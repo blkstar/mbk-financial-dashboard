@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBK Financial — Advisory Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --ink: oklch(0.20 0.020 155);
+  --ink-2: oklch(0.25 0.024 155);
+  --ink-3: oklch(0.30 0.026 155);
+  --ink-line: oklch(0.34 0.03 155 / 0.6);
+  --paper: oklch(0.985 0.004 155);
+  --panel: oklch(1 0 0);
+  --border: oklch(0.90 0.008 155);
+  --text: oklch(0.22 0.015 155);
+  --text-muted: oklch(0.50 0.014 155);
+  --text-faint: oklch(0.64 0.012 155);
+  --brand: oklch(0.53 0.125 154);
+  --brand-strong: oklch(0.44 0.125 154);
+  --brand-soft: oklch(0.94 0.045 154);
+  --brand-line: oklch(0.80 0.07 154);
+  --amber: oklch(0.68 0.15 70);
+  --amber-soft: oklch(0.95 0.05 75);
+  --red: oklch(0.56 0.19 26);
+  --red-soft: oklch(0.95 0.04 25);
+  --gray-soft: oklch(0.93 0.006 155);
+  --shadow-sm: 0 1px 2px oklch(0.2 0.02 155 / 0.06), 0 1px 1px oklch(0.2 0.02 155 / 0.04);
+  --shadow-md: 0 8px 24px oklch(0.2 0.02 155 / 0.10), 0 2px 6px oklch(0.2 0.02 155 / 0.06);
+  --shadow-lg: 0 24px 48px oklch(0.2 0.02 155 / 0.16), 0 8px 16px oklch(0.2 0.02 155 / 0.08);
+  --radius: 10px;
+  --radius-lg: 16px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --sidebar-w: 258px;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--text);
+  background:var(--paper);
+  -webkit-font-smoothing:antialiased;
+  font-size:14.5px;
+}
+h1,h2,h3,h4{margin:0; font-weight:700; letter-spacing:-0.015em; text-wrap:balance;}
+p{margin:0;}
+button{font-family:inherit;}
+::selection{background:var(--brand-soft);}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+}
+
+/* ---------- App shell ---------- */
+#app{display:flex; min-height:100vh;}
+
+/* ---------- Sidebar ---------- */
+.sidebar{
+  width:var(--sidebar-w);
+  flex:none;
+  background:linear-gradient(180deg, var(--ink) 0%, oklch(0.17 0.018 155) 100%);
+  color:oklch(0.92 0.01 155);
+  display:flex;
+  flex-direction:column;
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow-y:auto;
+}
+.brand-row{
+  padding:22px 20px 18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  border-bottom:1px solid var(--ink-line);
+}
+.brand-logo{
+  width:100%; max-width:188px; height:auto; display:block;
+}
+.brand-tag{font-size:11px; color:oklch(0.68 0.02 155); letter-spacing:0.04em; text-transform:uppercase;}
+
+/* client switcher */
+.client-switch{padding:14px 14px 10px;}
+.client-btn{
+  width:100%;
+  display:flex; align-items:center; gap:10px;
+  background:var(--ink-2);
+  border:1px solid var(--ink-line);
+  color:white;
+  border-radius:var(--radius);
+  padding:10px 12px;
+  cursor:pointer;
+  transition:background 0.18s var(--ease), transform 0.18s var(--ease);
+  text-align:left;
+}
+.client-btn:hover{background:var(--ink-3);}
+.client-btn:active{transform:scale(0.99);}
+.client-avatar{
+  width:28px; height:28px; border-radius:7px; flex:none;
+  background:var(--brand-soft); color:var(--brand-strong);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:12px;
+}
+.client-btn .meta{flex:1; min-width:0;}
+.client-btn .cname{font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.client-btn .cind{font-size:11px; color:oklch(0.66 0.02 155);}
+.client-btn .chev{color:oklch(0.6 0.02 155); flex:none;}
+
+.popover-backdrop{position:fixed; inset:0; z-index:40; display:none;}
+.popover-backdrop.open{display:block;}
+.client-popover{
+  position:fixed; z-index:41;
+  width:280px;
+  background:var(--panel);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-lg);
+  border:1px solid var(--border);
+  padding:8px;
+  opacity:0; transform:translateY(-6px) scale(0.98);
+  pointer-events:none;
+  transition:opacity 0.16s var(--ease), transform 0.16s var(--ease);
+}
+.client-popover.open{opacity:1; transform:translateY(0) scale(1); pointer-events:auto;}
+.popover-label{font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); padding:8px 10px 4px;}
+.popover-item{
+  display:flex; align-items:center; gap:10px;
+  padding:8px 10px; border-radius:8px; cursor:pointer;
+  color:var(--text);
+}
+.popover-item:hover{background:var(--gray-soft);}
+.popover-item .pi-avatar{width:26px;height:26px;border-radius:6px;background:var(--brand-soft);color:var(--brand-strong);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex:none;}
+.popover-item .pi-name{font-size:13px; font-weight:600;}
+.popover-item .pi-sub{font-size:11px; color:var(--text-faint);}
+.popover-item.active{background:var(--brand-soft);}
+.popover-divider{height:1px; background:var(--border); margin:6px 4px;}
+.popover-action{
+  display:flex; align-items:center; gap:8px;
+  padding:9px 10px; border-radius:8px; cursor:pointer;
+  color:var(--brand-strong); font-weight:600; font-size:13px;
+}
+.popover-action:hover{background:var(--brand-soft);}
+
+/* nav */
+.nav{padding:8px 14px; flex:1;}
+.nav-group{margin-top:16px;}
+.nav-label{
+  font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em;
+  color:oklch(0.55 0.02 155); padding:0 10px 6px;
+}
+.nav-item{
+  display:flex; align-items:center; gap:10px;
+  padding:9px 10px; border-radius:8px; margin-bottom:2px;
+  color:oklch(0.82 0.012 155);
+  cursor:pointer; font-size:13.5px; font-weight:500;
+  transition:background 0.15s var(--ease), color 0.15s var(--ease);
+  position:relative;
+}
+.nav-item svg{flex:none; opacity:0.85;}
+.nav-item:hover{background:var(--ink-2); color:white;}
+.nav-item.active{background:var(--brand); color:white; font-weight:600;}
+.nav-item.active svg{opacity:1;}
+
+.sidebar-foot{
+  margin-top:auto; padding:14px 18px 20px;
+  border-top:1px solid var(--ink-line);
+  font-size:11.5px; color:oklch(0.6 0.02 155);
+}
+.plan-badge{
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--ink-2); border:1px solid var(--ink-line);
+  color:oklch(0.85 0.03 154); padding:4px 9px; border-radius:100px;
+  font-size:11px; font-weight:600; margin-bottom:8px;
+}
+.plan-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--brand);}
+
+/* nav badges + mini stat */
+.nav-badge{
+  margin-left:auto; font-size:10.5px; font-weight:700;
+  background:oklch(0.4 0.03 155); color:oklch(0.9 0.02 155);
+  padding:1px 7px; border-radius:100px; line-height:1.5;
+}
+.nav-item.active .nav-badge{background:oklch(1 0 0 / 0.22); color:white;}
+.nav-badge.warn{background:var(--amber); color:oklch(0.2 0.08 65);}
+.mini-stat{
+  margin:0 14px 12px; padding:12px 14px; border-radius:var(--radius);
+  background:var(--ink-2); border:1px solid var(--ink-line);
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+}
+.mini-stat .ms-item{display:flex; flex-direction:column; gap:2px;}
+.mini-stat .ms-label{font-size:10px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(0.58 0.02 155);}
+.mini-stat .ms-value{font-size:15px; font-weight:700; color:white;}
+.mini-stat .ms-value.score-good{color:oklch(0.75 0.12 154);}
+.mini-stat .ms-value.score-warn{color:oklch(0.78 0.13 75);}
+.mini-stat .ms-value.score-bad{color:oklch(0.72 0.16 25);}
+
+/* gauge grid (Performance) */
+.gauge-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:16px;}
+.gauge-card{display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 4px;}
+.gauge-card .g-canvas{position:relative; width:110px; height:110px;}
+.gauge-card .g-value{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:800;}
+.gauge-card .g-label{font-size:12.5px; font-weight:600; margin-top:6px;}
+.gauge-card .g-target{font-size:11px; color:var(--text-faint);}
+
+/* insight banner (Recommendations) */
+.insight-banner{
+  display:flex; align-items:center; gap:14px;
+  padding:16px 20px; border-radius:var(--radius-lg);
+  background:var(--ink); color:white; margin-bottom:20px;
+}
+.insight-avatar{
+  width:38px; height:38px; border-radius:10px; flex:none;
+  background:var(--brand); display:flex; align-items:center; justify-content:center;
+  color:white;
+}
+.insight-body{flex:1; min-width:0;}
+.insight-title{font-size:14px; font-weight:700; margin-bottom:2px;}
+.insight-sub{font-size:12.5px; color:oklch(0.72 0.02 155);}
+.insight-meta{font-size:11px; color:oklch(0.62 0.02 155); font-family:ui-monospace, "SF Mono", Menlo, monospace; flex:none;}
+
+.rec-icon{
+  width:34px; height:34px; border-radius:9px; flex:none;
+  display:flex; align-items:center; justify-content:center;
+}
+.rec-icon.i-profit{background:var(--brand-soft); color:var(--brand-strong);}
+.rec-icon.i-operations{background:oklch(0.94 0.01 240); color:oklch(0.45 0.08 240);}
+.rec-icon.i-team{background:var(--amber-soft); color:oklch(0.42 0.13 65);}
+.rec-icon.i-debt{background:var(--red-soft); color:var(--red);}
+.rec-icon.i-marketing{background:oklch(0.94 0.05 320); color:oklch(0.45 0.13 320);}
+.rec-source{
+  font-size:10.5px; font-family:ui-monospace, "SF Mono", Menlo, monospace;
+  color:var(--text-faint); margin-top:8px;
+}
+
+/* guidance list (Goals) */
+.guidance-list{display:flex; flex-direction:column; gap:2px;}
+.guidance-row{
+  display:grid; grid-template-columns:150px 70px 1fr; gap:14px; align-items:center;
+  padding:12px 4px; border-bottom:1px solid var(--border);
+}
+.guidance-row:last-child{border-bottom:none;}
+.guidance-cat{font-weight:600; font-size:13px;}
+.guidance-dir{font-size:11px; color:var(--text-faint); text-align:center;}
+.guidance-text{font-size:12.5px; color:var(--text-muted); line-height:1.5;}
+
+/* ---------- Main ---------- */
+.main{flex:1; min-width:0; display:flex; flex-direction:column;}
+.topbar{
+  position:sticky; top:0; z-index:20;
+  background:oklch(0.985 0.004 155 / 0.88);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+  padding:18px 32px;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px;
+}
+.topbar h1{font-size:21px;}
+.topbar .sub{font-size:12.5px; color:var(--text-muted); margin-top:2px;}
+.topbar-actions{display:flex; align-items:center; gap:10px;}
+
+.btn{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:9px 15px; border-radius:9px; border:1px solid transparent;
+  font-size:13.5px; font-weight:600; cursor:pointer;
+  transition:transform 0.15s var(--ease), box-shadow 0.15s var(--ease), background 0.15s var(--ease), border-color 0.15s var(--ease);
+  white-space:nowrap;
+}
+.btn:active{transform:scale(0.97);}
+.btn-primary{
+  background:linear-gradient(180deg, var(--brand) 0%, var(--brand-strong) 100%);
+  color:white; box-shadow:0 1px 0 oklch(1 0 0 / 0.15) inset, var(--shadow-sm);
+}
+.btn-primary:hover{box-shadow:0 1px 0 oklch(1 0 0 / 0.2) inset, var(--shadow-md); transform:translateY(-1px);}
+.btn-ghost{background:var(--panel); border-color:var(--border); color:var(--text);}
+.btn-ghost:hover{background:var(--gray-soft); border-color:oklch(0.8 0.01 155);}
+.btn-sm{padding:6px 11px; font-size:12.5px; border-radius:7px;}
+
+.view{padding:26px 32px 60px; max-width:1360px;}
+.view[hidden]{display:none;}
+
+/* ---------- Utility layout ---------- */
+.stat-strip{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));
+  gap:1px; background:var(--border);
+  border:1px solid var(--border); border-radius:var(--radius-lg);
+  overflow:hidden; margin-bottom:28px;
+}
+.stat-cell{background:var(--panel); padding:18px 20px;}
+.stat-cell .k-label{font-size:12px; color:var(--text-muted); font-weight:500; margin-bottom:8px;}
+.stat-cell .k-value{font-size:25px; font-weight:700; letter-spacing:-0.02em; line-height:1.1;}
+.stat-cell .k-delta{font-size:12px; margin-top:6px; font-weight:600;}
+.k-delta.up{color:var(--brand-strong);}
+.k-delta.down{color:var(--red);}
+
+.section{margin-bottom:32px;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px; gap:12px;}
+.section-head h2{font-size:16px;}
+.section-head .desc{font-size:12.5px; color:var(--text-muted);}
+
+.grid-2{display:grid; grid-template-columns:1.3fr 1fr; gap:22px; align-items:start;}
+.grid-2.reverse{grid-template-columns:1fr 1.3fr;}
+@media (max-width:980px){.grid-2{grid-template-columns:1fr;}}
+
+.panel{
+  background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-lg);
+  padding:20px 22px;
+}
+
+/* health gauge */
+.health-wrap{display:flex; flex-direction:column; align-items:center; gap:6px; padding:6px 0 2px;}
+.health-score{font-size:38px; font-weight:800; letter-spacing:-0.02em;}
+.health-label{font-size:12.5px; color:var(--text-muted); font-weight:600;}
+.health-note{font-size:12px; color:var(--text-faint); text-align:center; margin-top:6px; max-width:220px;}
+
+/* tables */
+table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
+.data-table th{
+  text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;
+  color:var(--text-faint); font-weight:600; padding:0 12px 10px; border-bottom:1px solid var(--border);
+}
+.data-table td{padding:12px; border-bottom:1px solid var(--border); vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table td.num{text-align:right; font-variant-numeric:tabular-nums;}
+.data-table tr:hover td{background:oklch(0.98 0.006 155);}
+.row-label{font-weight:600;}
+.row-sub{font-size:11.5px; color:var(--text-faint);}
+
+.pill{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 9px; border-radius:100px; font-size:11.5px; font-weight:700;
+}
+.pill.good{background:var(--brand-soft); color:var(--brand-strong);}
+.pill.warn{background:var(--amber-soft); color:oklch(0.42 0.13 65);}
+.pill.bad{background:var(--red-soft); color:var(--red);}
+.pill.neutral{background:var(--gray-soft); color:var(--text-muted);}
+.pill .dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+
+.bar-track{height:6px; background:var(--gray-soft); border-radius:100px; overflow:hidden; width:84px;}
+.bar-fill{height:100%; border-radius:100px; background:var(--brand);}
+
+/* priorities */
+.priority-list{display:flex; flex-direction:column; gap:10px;}
+.priority-item{
+  display:grid; grid-template-columns:32px 1fr; gap:14px;
+  padding:16px 18px; border:1px solid var(--border); border-radius:var(--radius);
+  background:var(--panel);
+}
+.priority-num{
+  width:32px; height:32px; border-radius:9px; background:var(--ink);
+  color:white; display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:14px;
+}
+.priority-body .area{font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--brand-strong); font-weight:700; margin-bottom:3px;}
+.priority-body .stat{font-size:14.5px; font-weight:600; margin-bottom:5px;}
+.priority-body .focus{font-size:13px; color:var(--text-muted); line-height:1.5;}
+
+/* recommendation cards */
+.rec-list{display:flex; flex-direction:column; gap:10px;}
+.rec-item{
+  display:flex; gap:14px; padding:15px 18px; border:1px solid var(--border);
+  border-radius:var(--radius); background:var(--panel); align-items:flex-start;
+}
+.rec-item.resolved{opacity:0.55;}
+.rec-main{flex:1;}
+.rec-top{display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+.rec-area{font-weight:700; font-size:13.5px;}
+.rec-issue{font-size:13px; color:var(--text); margin-bottom:5px; line-height:1.5;}
+.rec-meta{font-size:12px; color:var(--text-muted); line-height:1.5;}
+.rec-meta b{color:var(--text);}
+.toggle-btn{
+  border:1px solid var(--border); background:var(--panel); border-radius:7px;
+  padding:6px 11px; font-size:12px; font-weight:600; cursor:pointer; flex:none;
+  transition:background 0.15s var(--ease);
+}
+.toggle-btn:hover{background:var(--gray-soft);}
+.toggle-btn.is-open{color:var(--brand-strong); border-color:var(--brand-line);}
+.toggle-btn.is-resolved{color:var(--text-faint);}
+
+/* forms */
+.field{margin-bottom:16px;}
+.field label{display:block; font-size:12.5px; font-weight:600; color:var(--text); margin-bottom:6px;}
+.field .hint{font-size:11.5px; color:var(--text-faint); margin-top:5px;}
+.field input, .field select{
+  width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px;
+  font-size:13.5px; font-family:inherit; background:var(--panel); color:var(--text);
+  transition:border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+.field input:focus, .field select:focus{outline:none; border-color:var(--brand-line); box-shadow:0 0 0 3px var(--brand-soft);}
+.field-row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+
+/* dropzone */
+.dropzone{
+  border:1.5px dashed var(--border); border-radius:var(--radius-lg);
+  padding:40px 24px; text-align:center; background:oklch(0.98 0.006 155);
+  transition:border-color 0.18s var(--ease), background 0.18s var(--ease);
+  cursor:pointer;
+}
+.dropzone.drag{border-color:var(--brand); background:var(--brand-soft);}
+.dropzone .dz-icon{width:44px;height:44px;border-radius:12px;background:var(--brand-soft);color:var(--brand-strong);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.dropzone h3{font-size:14.5px; margin-bottom:4px;}
+.dropzone p{font-size:12.5px; color:var(--text-muted);}
+
+/* toast */
+#toast-host{position:fixed; bottom:22px; right:22px; z-index:80; display:flex; flex-direction:column; gap:8px;}
+.toast{
+  background:var(--ink); color:white; padding:12px 16px; border-radius:10px;
+  font-size:13px; font-weight:500; box-shadow:var(--shadow-lg);
+  display:flex; align-items:center; gap:10px;
+  animation:toast-in 0.28s var(--ease);
+}
+.toast .tick{color:oklch(0.72 0.14 154);}
+@keyframes toast-in{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+/* client list rows in intake */
+.client-row{
+  display:flex; align-items:center; gap:12px; padding:12px 14px;
+  border:1px solid var(--border); border-radius:10px; margin-bottom:8px;
+}
+.client-row .ca{width:32px;height:32px;border-radius:8px;background:var(--brand-soft);color:var(--brand-strong);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;}
+.client-row .cn{font-weight:600; font-size:13.5px;}
+.client-row .ci{font-size:11.5px; color:var(--text-faint);}
+.client-row .spacer{flex:1;}
+
+.chart-box{position:relative; height:280px;}
+.chart-box.tall{height:320px;}
+
+.empty-state{
+  text-align:center; padding:36px 20px; color:var(--text-faint);
+  border:1px dashed var(--border); border-radius:var(--radius); font-size:13px;
+}
+
+.legend-row{display:flex; gap:16px; font-size:12px; color:var(--text-muted); margin-top:10px; flex-wrap:wrap;}
+.legend-row span{display:inline-flex; align-items:center; gap:6px;}
+.legend-row i{width:10px; height:10px; border-radius:3px; display:inline-block;}
+
+.benchmark-highlight td{background:var(--brand-soft) !important;}
+
+@media (max-width:860px){
+  .sidebar{position:fixed; left:0; top:0; transform:translateX(-100%); z-index:60; box-shadow:var(--shadow-lg);}
+  .sidebar.open{transform:translateX(0);}
+  .view, .topbar{padding-left:18px; padding-right:18px;}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand-row">
+      <img class="brand-logo" alt="MBK Financial Services" src="mbk-logo.png">
+      <div class="brand-tag">Advisory Reporting</div>
+    </div>
+
+    <div class="client-switch">
+      <button class="client-btn" id="clientSwitchBtn">
+        <div class="client-avatar" id="clientAvatar">A</div>
+        <div class="meta">
+          <div class="cname" id="clientBtnName">Alky's LLC</div>
+          <div class="cind" id="clientBtnIndustry">Liquor Store</div>
+        </div>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="mini-stat">
+      <div class="ms-item">
+        <div class="ms-label">Revenue</div>
+        <div class="ms-value" id="miniRevenue">$147,504</div>
+      </div>
+      <div class="ms-item">
+        <div class="ms-label">Health score</div>
+        <div class="ms-value" id="miniHealth">70/100</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-group">
+        <div class="nav-label">Reporting</div>
+        <div class="nav-item" data-view="dashboard">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>
+          Dashboard
+        </div>
+        <div class="nav-item" data-view="performance">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 17l5-5 4 4 8-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7h5v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Performance
+        </div>
+        <div class="nav-item" data-view="goals">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg>
+          Goals &amp; Benchmarks
+        </div>
+        <div class="nav-item" data-view="cashdebt">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2.5" y="6" width="19" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 10h19" stroke="currentColor" stroke-width="1.8"/><path d="M6 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Cash &amp; Debt
+        </div>
+        <div class="nav-item" data-view="recommendations">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          Recommendations
+          <span class="nav-badge" id="navBadgeRec">5</span>
+        </div>
+        <div class="nav-item" data-view="notes">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 4h14v13l-4 4H5V4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 9h6M9 13h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Advisor Notes
+          <span class="nav-badge" id="navBadgeNotes">0</span>
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Manage</div>
+        <div class="nav-item" data-view="intake">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Client Intake
+        </div>
+        <div class="nav-item" data-view="benchmarks">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 20V10M12 20V4M20 20v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Industry Benchmarks
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="plan-badge"><span class="dot"></span><span id="planBadge">$600+ Monthly Advisory</span></div>
+      <div id="footPrepared">Prepared by MBK Financial Services</div>
+      <div id="footMonth">Reporting month: Jun 2026</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="sub" id="pageSub">Financial snapshot for the selected reporting period</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" onclick="window.print()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-2M6 14h12v7H6v-7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          Print
+        </button>
+        <button class="btn btn-primary" onclick="go('intake')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Add Client
+        </button>
+      </div>
+    </div>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section class="view" id="view-dashboard">
+      <div class="stat-strip" id="snapshotStrip"></div>
+
+      <div class="grid-2">
+        <div class="panel section">
+          <div class="section-head">
+            <h2>Revenue, Expenses &amp; Profit</h2>
+            <div class="desc" id="trendDesc">Year to date</div>
+          </div>
+          <div class="chart-box"><canvas id="chartDashTrend"></canvas></div>
+        </div>
+        <div class="panel section">
+          <div class="section-head"><h2>Business Health Score</h2></div>
+          <div class="health-wrap">
+            <div class="chart-box" style="height:170px; width:170px;"><canvas id="chartHealth"></canvas></div>
+            <div class="health-score" id="healthScoreNum">70</div>
+            <div class="health-label" id="healthScoreLabel">Fair — needs a few fixes</div>
+            <div class="health-note">Weighted from margin, cost, revenue trend and debt scorecard categories</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>KPI Scorecard</h2>
+          <div class="desc">Actuals vs. effective target, weighted by category score</div>
+        </div>
+        <div class="panel" style="padding:8px 10px;">
+          <table class="data-table" id="kpiScorecardTable"></table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Top Priorities</h2>
+          <div class="desc" id="prioritiesDesc">What to lead with in the advisory meeting</div>
+        </div>
+        <div class="priority-list" id="priorityList"></div>
+      </div>
+    </section>
+
+    <!-- ===================== PERFORMANCE ===================== -->
+    <section class="view" id="view-performance" hidden>
+      <div class="stat-strip" id="perfSnapshotStrip"></div>
+
+      <div class="panel section">
+        <div class="section-head">
+          <h2>Business Performance Trends</h2>
+          <div class="desc" id="perfDesc">Year-to-date</div>
+        </div>
+        <div class="chart-box tall"><canvas id="chartPerfTrend"></canvas></div>
+      </div>
+
+      <div class="panel section">
+        <div class="section-head">
+          <h2>KPI Health at a Glance</h2>
+          <div class="desc" id="gaugeDesc">Actual vs. effective target for the reporting month</div>
+        </div>
+        <div class="gauge-grid" id="gaugeGrid"></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel section">
+          <div class="section-head">
+            <h2>KPI % Trend</h2>
+            <div class="desc">Profit margin, team, marketing and operations as a percent of revenue</div>
+          </div>
+          <div class="chart-box tall"><canvas id="chartKpiTrend"></canvas></div>
+        </div>
+        <div class="panel section">
+          <div class="section-head">
+            <h2>Operating Expense Mix</h2>
+            <div class="desc" id="expenseMixDesc">Jun 2026 · from the general ledger</div>
+          </div>
+          <div class="chart-box"><canvas id="chartExpenseMix"></canvas></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Monthly Detail</h2></div>
+        <div class="panel" style="padding:8px 10px; overflow-x:auto;">
+          <table class="data-table" id="monthlyDetailTable"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== GOALS & BENCHMARKS ===================== -->
+    <section class="view" id="view-goals" hidden>
+      <div class="section">
+        <div class="section-head">
+          <h2>Goals &amp; Industry Benchmarks</h2>
+          <div class="desc" id="goalsDesc">Liquor Store · Jun 2026</div>
+        </div>
+        <div class="panel" style="padding:8px 10px;">
+          <table class="data-table" id="goalsTable"></table>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel section">
+          <div class="section-head"><h2>Actual vs. Target</h2></div>
+          <div class="chart-box"><canvas id="chartGoalsBar"></canvas></div>
+        </div>
+        <div class="panel section">
+          <div class="section-head">
+            <h2>Coaching Guidance</h2>
+            <div class="desc">From MBK's target playbook</div>
+          </div>
+          <div class="guidance-list" id="guidanceList"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Client Goals</h2>
+          <div class="desc">Tracked targets and owners</div>
+        </div>
+        <div class="panel" style="padding:8px 10px;">
+          <table class="data-table" id="clientGoalsTable"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CASH & DEBT ===================== -->
+    <section class="view" id="view-cashdebt" hidden>
+      <div class="stat-strip" id="debtStrip"></div>
+      <div class="section">
+        <div class="section-head">
+          <h2>Debt Register</h2>
+          <div class="desc">Update monthly as balances change</div>
+          <button class="btn btn-ghost btn-sm" onclick="addDebtRow()">+ Add debt</button>
+        </div>
+        <div class="panel" style="padding:8px 10px; overflow-x:auto;">
+          <table class="data-table" id="debtTable"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== RECOMMENDATIONS ===================== -->
+    <section class="view" id="view-recommendations" hidden>
+      <div class="insight-banner" id="insightBanner">
+        <div class="insight-avatar">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="insight-body">
+          <div class="insight-title">MBK Insight Engine</div>
+          <div class="insight-sub" id="insightSub">Scanned the reporting-month financials against effective targets</div>
+        </div>
+        <div class="insight-meta" id="insightMeta">analyzed jun 2026</div>
+      </div>
+      <div class="section">
+        <div class="section-head">
+          <h2>Recommendations</h2>
+          <div class="desc">Issue → business impact → recommended focus</div>
+        </div>
+        <div class="rec-list" id="recList"></div>
+      </div>
+    </section>
+
+    <!-- ===================== ADVISOR NOTES ===================== -->
+    <section class="view" id="view-notes" hidden>
+      <div class="grid-2 reverse">
+        <div class="panel section">
+          <div class="section-head"><h2>Log a Meeting Note</h2></div>
+          <div class="field"><label>Meeting date</label><input type="date" id="noteDate"></div>
+          <div class="field-row">
+            <div class="field"><label>Win</label><input type="text" id="noteWin" placeholder="What went well"></div>
+            <div class="field"><label>Risk / concern</label><input type="text" id="noteRisk" placeholder="What needs attention"></div>
+          </div>
+          <div class="field"><label>Decision</label><input type="text" id="noteDecision" placeholder="What was decided"></div>
+          <div class="field-row">
+            <div class="field"><label>Action item</label><input type="text" id="noteAction" placeholder="Next step"></div>
+            <div class="field"><label>Owner</label><input type="text" id="noteOwner" placeholder="Who owns it"></div>
+          </div>
+          <div class="field"><label>Due date</label><input type="date" id="noteDue"></div>
+          <button class="btn btn-primary" onclick="addNote()">Save note</button>
+        </div>
+        <div class="section">
+          <div class="section-head">
+            <h2>Meeting History</h2>
+            <div class="desc">Reporting month: <span id="notesMonth">Jun 2026</span></div>
+          </div>
+          <div id="notesList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CLIENT INTAKE ===================== -->
+    <section class="view" id="view-intake" hidden>
+      <div class="grid-2">
+        <div class="panel section">
+          <div class="section-head">
+            <h2>Upload Client Workbook</h2>
+            <div class="desc">MBK Business Performance System (.xlsx)</div>
+          </div>
+          <div class="dropzone" id="dropzone">
+            <div class="dz-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Drop the client's .xlsx here</h3>
+            <p>or click to browse — parses Settings, Monthly Data, Dashboard, Goals &amp; Debt sheets</p>
+            <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
+          </div>
+          <div class="field" style="margin-top:18px;">
+            <div class="hint">A new client card is created automatically once the file is parsed. Existing clients are not overwritten.</div>
+          </div>
+        </div>
+
+        <div class="panel section">
+          <div class="section-head"><h2>Or Enter Client Manually</h2></div>
+          <div class="field"><label>Client name</label><input type="text" id="inClientName" placeholder="e.g. Alky's LLC"></div>
+          <div class="field-row">
+            <div class="field">
+              <label>Industry</label>
+              <select id="inIndustry"></select>
+            </div>
+            <div class="field"><label>Entity type</label><input type="text" id="inEntity" placeholder="Partnership, S-Corp..."></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Reporting month</label><input type="text" id="inMonth" placeholder="Jun 2026"></div>
+            <div class="field"><label>Client plan</label><input type="text" id="inPlan" placeholder="$600+ Monthly Advisory"></div>
+          </div>
+          <div class="field"><label>Prepared by</label><input type="text" id="inPrepared" value="MBK Financial Services"></div>
+          <button class="btn btn-primary" onclick="createManualClient()">Create client</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Clients on File (<span id="clientCount">1</span>)</h2></div>
+        <div id="clientListWrap"></div>
+      </div>
+    </section>
+
+    <!-- ===================== INDUSTRY BENCHMARKS ===================== -->
+    <section class="view" id="view-benchmarks" hidden>
+      <div class="section">
+        <div class="section-head">
+          <h2>Industry Benchmark Library</h2>
+          <div class="desc">Reference targets by industry — current client's industry is highlighted</div>
+        </div>
+        <div class="panel" style="padding:8px 10px; overflow-x:auto;">
+          <table class="data-table" id="benchmarkTable"></table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="popover-backdrop" id="popoverBackdrop"></div>
+<div class="client-popover" id="clientPopover">
+  <div class="popover-label">Switch client</div>
+  <div id="popoverClientList"></div>
+  <div class="popover-divider"></div>
+  <div class="popover-action" onclick="closePopover(); go('intake');">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    Add a new client
+  </div>
+</div>
+
+<div id="toast-host"></div>
+
+<script>
+/* ======================================================================
+   DATA — seeded from MBK_Business_Performance_System_v1_Alkys.xlsx
+   ====================================================================== */
+const MONTH_ORDER = ["Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026","Jul 2026"];
+
+const INDUSTRY_PROFILES = [
+  {industry:"Chiropractic", cogs:0.03, team:0.35, occupancy:0.10, marketing:0.10, operations:0.175, profit:0.245, debtService:0.10, cashReserve:2},
+  {industry:"Professional Services / Consulting", cogs:0, team:0.40, occupancy:0.08, marketing:0.08, operations:0.24, profit:0.20, debtService:0.10, cashReserve:3},
+  {industry:"Accounting / Tax Firm", cogs:0, team:0.42, occupancy:0.08, marketing:0.05, operations:0.20, profit:0.25, debtService:0.10, cashReserve:3},
+  {industry:"Law Firm", cogs:0, team:0.45, occupancy:0.08, marketing:0.05, operations:0.12, profit:0.30, debtService:0.10, cashReserve:3},
+  {industry:"Medical Practice", cogs:0.08, team:0.40, occupancy:0.08, marketing:0.06, operations:0.18, profit:0.20, debtService:0.10, cashReserve:2.5},
+  {industry:"Contractor / Trades", cogs:0.25, team:0.20, occupancy:0.05, marketing:0.05, operations:0.30, profit:0.15, debtService:0.12, cashReserve:2},
+  {industry:"Retail", cogs:0.40, team:0.20, occupancy:0.08, marketing:0.06, operations:0.16, profit:0.10, debtService:0.12, cashReserve:2},
+  {industry:"Liquor Store", cogs:0.75, team:0.08, occupancy:0.10, marketing:0.02, operations:0.10, profit:0.06, debtService:0.05, cashReserve:1.5},
+];
+
+/* from the workbook's Targets sheet — applies to any client/industry */
+const TARGET_GUIDANCE = [
+  {category:"Products/COGS", direction:"Below", guidance:"Keep direct product and supply costs below target."},
+  {category:"Team", direction:"Below", guidance:"Keep payroll, benefits, and contractors below target."},
+  {category:"Occupancy", direction:"Below", guidance:"Monitor rent, utilities, repairs, and facility costs."},
+  {category:"Marketing", direction:"Below", guidance:"Compare spend with lead and revenue performance."},
+  {category:"Operations", direction:"Below", guidance:"Review software, admin, insurance, fees, and professional costs."},
+  {category:"Net Income", direction:"Above", guidance:"Reach or exceed the operating profit target."},
+];
+
+function seedAlkys(){
+  return {
+    id: "alkys-llc",
+    name: "Alky's LLC",
+    industry: "Liquor Store",
+    entityType: "Partnership",
+    reportingMonth: "Jun 2026",
+    preparedBy: "MBK Financial Services",
+    plan: "$600+ Monthly Advisory",
+    monthly: {
+      "Jan 2026": {income:95209.81, cogs:69632.43, grossProfit:25577.38, team:0, marketing:0, overhead:4715, operations:4715, totalExpenses:19369.21, netIncome:6208.17, gpMargin:0.2686, profitMargin:0.0652, teamPct:0, marketingPct:0, opsPct:0.0495},
+      "Feb 2026": {income:91914.75, cogs:78308.49, grossProfit:13606.26, team:0, marketing:0, overhead:4715, operations:4715, totalExpenses:23504.26, netIncome:-9898.00, gpMargin:0.1480, profitMargin:-0.1077, teamPct:0, marketingPct:0, opsPct:0.0513},
+      "Mar 2026": {income:118093.51, cogs:105052.53, grossProfit:13040.98, team:0, marketing:0, overhead:4715, operations:4715, totalExpenses:24058.05, netIncome:-11017.07, gpMargin:0.1104, profitMargin:-0.0933, teamPct:0, marketingPct:0, opsPct:0.0399},
+      "Apr 2026": {income:109611.90, cogs:99516.24, grossProfit:10095.66, team:0, marketing:0, overhead:5115, operations:5115, totalExpenses:26516.85, netIncome:-16421.19, gpMargin:0.0921, profitMargin:-0.1498, teamPct:0, marketingPct:0, opsPct:0.0467},
+      "May 2026": {income:116884.63, cogs:73485.90, grossProfit:43398.73, team:12096.33, marketing:0, overhead:4715, operations:4715, totalExpenses:22090.41, netIncome:21308.32, gpMargin:0.3713, profitMargin:0.1823, teamPct:0.1035, marketingPct:0, opsPct:0.0403},
+      "Jun 2026": {income:147503.83, cogs:102689.71, grossProfit:44814.12, team:16257.43, marketing:0, overhead:5115, operations:5115, totalExpenses:39903.03, netIncome:4911.09, gpMargin:0.3038, profitMargin:0.0333, teamPct:0.1102, marketingPct:0, opsPct:0.0347},
+      "Jul 2026": {income:70584.45, cogs:61598.60, grossProfit:8985.85, team:6432.17, marketing:0, overhead:5115, operations:5115, totalExpenses:22221.49, netIncome:-13235.64, gpMargin:0.1273, profitMargin:-0.1875, teamPct:0.0911, marketingPct:0, opsPct:0.0725},
+    },
+    snapshot: {revenue:147503.83, grossProfit:44814.12, totalExpenses:39903.03, netIncome:4911.09, profitMargin:0.0333, healthScore:70},
+    kpiScorecard: [
+      {category:"Products/COGS", actualDollar:102689.71, actualPct:0.6962, target:0.75, varianceDollar:-7938.16, status:"On Target", score:5.0, maxScore:20},
+      {category:"Team", actualDollar:16257.43, actualPct:0.1102, target:0.08, varianceDollar:4457.12, status:"Needs Attention", score:14.52, maxScore:20},
+      {category:"Marketing", actualDollar:0, actualPct:0, target:0.02, varianceDollar:-2950.08, status:"On Target", score:0, maxScore:10},
+      {category:"Operations", actualDollar:5115, actualPct:0.0347, target:0.10, varianceDollar:-9635.38, status:"On Target", score:20, maxScore:20},
+      {category:"Profit", actualDollar:4911.09, actualPct:0.0333, target:0.06, varianceDollar:-3939.14, status:"Needs Attention", score:16.65, maxScore:20},
+      {category:"Revenue Trend", actualDollar:147503.83, actualPct:0.2620, target:0, varianceDollar:38640.23, status:"On Target", score:10, maxScore:10},
+      {category:"Debt Service", actualDollar:0, actualPct:0, target:0.05, varianceDollar:0, status:"Not Scored", score:0, maxScore:10},
+    ],
+    topPriorities: [
+      {priority:1, area:"Operations", stat:"3.5% operations vs 10.0% target", focus:"Review the largest operating accounts and separate recurring commitments from reducible spending."},
+      {priority:2, area:"Profit", stat:"3.3% profit margin vs 6.0% target", focus:"Set the next-month profit goal before approving discretionary purchases or new commitments."},
+      {priority:3, area:"Debt / Team", stat:"Debt balances have not been entered", focus:"Complete the debt register, then compare debt service and team capacity with current revenue."},
+    ],
+    goalsBenchmarks: [
+      {kpi:"Products/COGS", actual:0.6962, target:0.75, status:"On Target", note:"Maintain current discipline."},
+      {kpi:"Team", actual:0.1102, target:0.08, status:"Needs Attention", note:"Review the largest accounts driving this variance."},
+      {kpi:"Marketing", actual:0, target:0.02, status:"On Target", note:"Maintain current discipline."},
+      {kpi:"Operations", actual:0.0347, target:0.10, status:"On Target", note:"Maintain current discipline."},
+      {kpi:"Profit Margin", actual:0.0333, target:0.06, status:"Needs Attention", note:"Review the largest accounts driving this variance."},
+    ],
+    clientGoals: [
+      {type:"Revenue", current:"", goal:"", due:"", owner:""},
+      {type:"Profit", current:"", goal:"", due:"", owner:""},
+      {type:"Cash Reserve", current:"", goal:"", due:"", owner:""},
+      {type:"Debt Reduction", current:"", goal:"", due:"", owner:""},
+    ],
+    debt: {totalDebt:0, monthlyDebtService:0, highInterestDebt:0, weightedAPR:0, debtServicePct:0, industryTarget:0.05, status:"Not entered", register:[]},
+    expenseBreakdown: [
+      {label:"Salaries & Wages", amount:16257.43},
+      {label:"Office Supplies", amount:10000.00},
+      {label:"Sales Tax", amount:5000.00},
+      {label:"Office Rent", amount:5115.00},
+      {label:"Payroll Taxes", amount:2393.92},
+      {label:"Bank & Credit Card Charges", amount:446.82},
+      {label:"Merchant Fees", amount:415.09},
+      {label:"Repairs & Maintenance", amount:180.00},
+      {label:"Interest Expense", amount:76.77},
+      {label:"Payroll Fees", amount:18.00},
+    ],
+    recommendations: [
+      {priority:"High", area:"Profit", issue:"Profit margin is below the effective industry target.", impact:"Lower retained cash and less capacity for growth or taxes.", focus:"Set a monthly profit target and review discretionary spending before approval.", status:"Open"},
+      {priority:"High", area:"Operations", issue:"Operating costs exceed the effective industry target.", impact:"Expense growth is absorbing revenue and weakening margin.", focus:"Identify the largest recurring and reducible operating accounts.", status:"Open"},
+      {priority:"Medium", area:"Team", issue:"Team cost percentage is outside the effective industry target.", impact:"Staffing capacity may be misaligned with current revenue.", focus:"Compare payroll cost, staffing capacity, and service volume.", status:"Open"},
+      {priority:"Medium", area:"Debt", issue:"Debt tracker is incomplete or debt service exceeds target.", impact:"Required payments may constrain cash and limit decision flexibility.", focus:"Enter all debt balances and prioritize high-interest obligations.", status:"Open"},
+      {priority:"Medium", area:"Marketing", issue:"Marketing should be evaluated against both target and return.", impact:"Cutting effective marketing can slow growth; weak campaigns waste cash.", focus:"Review campaign-level return before increasing or reducing spend.", status:"Open"},
+    ],
+    advisorNotes: [],
+  };
+}
+
+let clients = [seedAlkys()];
+let activeClientId = clients[0].id;
+let currentView = "dashboard";
+let charts = {};
+
+function activeClient(){ return clients.find(c => c.id === activeClientId); }
+
+/* ======================================================================
+   HELPERS
+   ====================================================================== */
+function money(n, opts={}){
+  if(n === null || n === undefined || isNaN(n)) return "—";
+  const sign = n < 0 ? "-" : "";
+  const abs = Math.abs(n);
+  return sign + "$" + abs.toLocaleString("en-US", {minimumFractionDigits: opts.decimals ?? 0, maximumFractionDigits: opts.decimals ?? 0});
+}
+function pct(n, decimals=1){
+  if(n === null || n === undefined || isNaN(n)) return "—";
+  return (n*100).toFixed(decimals) + "%";
+}
+function initials(name){
+  return name.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+}
+function statusPill(status){
+  const map = {"On Target":"good", "Needs Attention":"warn", "Critical":"bad", "Not Scored":"neutral", "Not entered":"neutral"};
+  const cls = map[status] || "neutral";
+  return `<span class="pill ${cls}"><span class="dot"></span>${status}</span>`;
+}
+function priorityPill(p){
+  const map = {High:"bad", Medium:"warn", Low:"neutral"};
+  return `<span class="pill ${map[p]||'neutral'}"><span class="dot"></span>${p}</span>`;
+}
+function toast(msg){
+  const host = document.getElementById("toast-host");
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.innerHTML = `<svg class="tick" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>${msg}`;
+  host.appendChild(el);
+  setTimeout(()=>{ el.style.transition="opacity .3s var(--ease), transform .3s var(--ease)"; el.style.opacity="0"; el.style.transform="translateY(6px)"; setTimeout(()=>el.remove(), 300); }, 2600);
+}
+function monthsWithData(client){
+  return MONTH_ORDER.filter(m => client.monthly[m] && client.monthly[m].income > 0);
+}
+
+/* ======================================================================
+   RENDER: NAV / TOPBAR / CLIENT SWITCHER
+   ====================================================================== */
+const PAGE_META = {
+  dashboard: ["Dashboard", "Financial snapshot for the selected reporting period"],
+  performance: ["Performance", "Trends across the trailing reporting periods"],
+  goals: ["Goals & Benchmarks", "Actuals compared with effective industry targets"],
+  cashdebt: ["Cash & Debt", "Debt register and monthly service coverage"],
+  recommendations: ["Recommendations", "Issue, business impact and recommended focus"],
+  notes: ["Advisor Notes", "Meeting log and follow-up actions"],
+  intake: ["Client Intake", "Upload a workbook or add a client manually"],
+  benchmarks: ["Industry Benchmarks", "Reference targets across MBK's supported industries"],
+};
+
+function go(view){
+  currentView = view;
+  document.querySelectorAll(".view").forEach(v => v.hidden = true);
+  document.getElementById("view-"+view).hidden = false;
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.view === view));
+  const [title, sub] = PAGE_META[view];
+  document.getElementById("pageTitle").textContent = title;
+  document.getElementById("pageSub").textContent = sub;
+  if(window.innerWidth <= 860) document.getElementById("sidebar").classList.remove("open");
+  renderView(view);
+}
+
+document.querySelectorAll(".nav-item").forEach(item=>{
+  item.addEventListener("click", ()=>go(item.dataset.view));
+});
+
+function renderClientChrome(){
+  const c = activeClient();
+  document.getElementById("clientBtnName").textContent = c.name;
+  document.getElementById("clientBtnIndustry").textContent = c.industry;
+  document.getElementById("clientAvatar").textContent = initials(c.name);
+  document.getElementById("planBadge").textContent = c.plan || "—";
+  document.getElementById("footPrepared").textContent = "Prepared by " + (c.preparedBy || "MBK Financial Services");
+  document.getElementById("footMonth").textContent = "Reporting month: " + c.reportingMonth;
+  document.getElementById("notesMonth").textContent = c.reportingMonth;
+  document.getElementById("trendDesc").textContent = c.name + " · Year to date";
+  document.getElementById("perfDesc").textContent = c.name + " · Year to date";
+  document.getElementById("goalsDesc").textContent = c.industry + " · " + c.reportingMonth;
+  document.getElementById("prioritiesDesc").textContent = "What to lead with in the " + c.reportingMonth + " advisory meeting";
+
+  document.getElementById("miniRevenue").textContent = money(c.snapshot.revenue);
+  const healthEl = document.getElementById("miniHealth");
+  healthEl.textContent = c.snapshot.healthScore + "/100";
+  healthEl.className = "ms-value " + (c.snapshot.healthScore>=80?"score-good":c.snapshot.healthScore>=60?"score-warn":"score-bad");
+
+  const openRecs = c.recommendations.filter(r=>r.status!=="Resolved").length;
+  const recBadge = document.getElementById("navBadgeRec");
+  recBadge.textContent = openRecs;
+  recBadge.classList.toggle("warn", openRecs>0);
+  document.getElementById("navBadgeNotes").textContent = c.advisorNotes.length;
+}
+
+function renderPopoverList(){
+  const wrap = document.getElementById("popoverClientList");
+  wrap.innerHTML = clients.map(c => `
+    <div class="popover-item ${c.id===activeClientId?'active':''}" onclick="switchClient('${c.id}')">
+      <div class="pi-avatar">${initials(c.name)}</div>
+      <div>
+        <div class="pi-name">${c.name}</div>
+        <div class="pi-sub">${c.industry} · ${c.reportingMonth}</div>
+      </div>
+    </div>
+  `).join("");
+}
+function switchClient(id){
+  activeClientId = id;
+  closePopover();
+  renderClientChrome();
+  renderView(currentView);
+  toast("Switched to " + activeClient().name);
+}
+const clientSwitchBtn = document.getElementById("clientSwitchBtn");
+const clientPopover = document.getElementById("clientPopover");
+const popoverBackdrop = document.getElementById("popoverBackdrop");
+clientSwitchBtn.addEventListener("click", ()=>{
+  const r = clientSwitchBtn.getBoundingClientRect();
+  clientPopover.style.left = r.left + "px";
+  clientPopover.style.top = (r.bottom + 8) + "px";
+  renderPopoverList();
+  clientPopover.classList.add("open");
+  popoverBackdrop.classList.add("open");
+});
+function closePopover(){
+  clientPopover.classList.remove("open");
+  popoverBackdrop.classList.remove("open");
+}
+popoverBackdrop.addEventListener("click", closePopover);
+
+/* ======================================================================
+   RENDER: DASHBOARD VIEW
+   ====================================================================== */
+function renderDashboard(){
+  const c = activeClient();
+  const s = c.snapshot;
+  const strip = document.getElementById("snapshotStrip");
+  strip.innerHTML = `
+    <div class="stat-cell"><div class="k-label">Revenue</div><div class="k-value">${money(s.revenue)}</div></div>
+    <div class="stat-cell"><div class="k-label">Gross Profit</div><div class="k-value">${money(s.grossProfit)}</div></div>
+    <div class="stat-cell"><div class="k-label">Total Expenses</div><div class="k-value">${money(s.totalExpenses)}</div></div>
+    <div class="stat-cell"><div class="k-label">Net Income</div><div class="k-value" style="color:${s.netIncome>=0?'var(--brand-strong)':'var(--red)'}">${money(s.netIncome)}</div></div>
+    <div class="stat-cell"><div class="k-label">Profit Margin</div><div class="k-value">${pct(s.profitMargin)}</div></div>
+  `;
+
+  // trend chart
+  const months = monthsWithData(c);
+  const income = months.map(m=>c.monthly[m].income);
+  const expenses = months.map(m=>c.monthly[m].totalExpenses);
+  const profit = months.map(m=>c.monthly[m].netIncome);
+  renderChart("chartDashTrend", "bar", {
+    labels: months.map(m=>m.split(" ")[0]),
+    datasets: [
+      {type:"bar", label:"Income", data:income, backgroundColor:"oklch(0.53 0.125 154 / 0.85)", borderRadius:5, order:2},
+      {type:"bar", label:"Expenses", data:expenses, backgroundColor:"oklch(0.75 0.02 155)", borderRadius:5, order:2},
+      {type:"line", label:"Net Income", data:profit, borderColor:"oklch(0.58 0.19 26)", backgroundColor:"oklch(0.58 0.19 26)", tension:0.35, pointRadius:3, order:1},
+    ]
+  });
+
+  renderHealthGauge(s.healthScore);
+
+  // KPI scorecard table
+  const tbl = document.getElementById("kpiScorecardTable");
+  tbl.innerHTML = `
+    <thead><tr><th>Category</th><th class="num">Actual</th><th class="num">Target</th><th class="num">Variance</th><th>Status</th><th>Score</th></tr></thead>
+    <tbody>
+    ${c.kpiScorecard.map(k=>`
+      <tr>
+        <td class="row-label">${k.category}</td>
+        <td class="num">${k.category==="Debt Service" ? "—" : pct(k.actualPct)}</td>
+        <td class="num">${k.target ? pct(k.target) : "—"}</td>
+        <td class="num" style="color:${k.varianceDollar<0?'var(--red)':'var(--brand-strong)'}">${money(k.varianceDollar)}</td>
+        <td>${statusPill(k.status)}</td>
+        <td>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,(k.score/k.maxScore)*100)}%"></div></div>
+            <span style="font-size:11.5px; color:var(--text-faint);">${k.score.toFixed(1)}/${k.maxScore}</span>
+          </div>
+        </td>
+      </tr>`).join("")}
+    </tbody>
+  `;
+
+  // priorities
+  document.getElementById("priorityList").innerHTML = c.topPriorities.map(p=>`
+    <div class="priority-item">
+      <div class="priority-num">${p.priority}</div>
+      <div class="priority-body">
+        <div class="area">${p.area}</div>
+        <div class="stat">${p.stat}</div>
+        <div class="focus">${p.focus}</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderHealthGauge(score){
+  const ctx = document.getElementById("chartHealth");
+  if(charts.health) charts.health.destroy();
+  let color = score >= 80 ? "oklch(0.53 0.125 154)" : score >= 60 ? "oklch(0.68 0.15 70)" : "oklch(0.56 0.19 26)";
+  charts.health = new Chart(ctx, {
+    type:"doughnut",
+    data:{ datasets:[{ data:[score, 100-score], backgroundColor:[color, "oklch(0.93 0.006 155)"], borderWidth:0, cutout:"78%" }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{enabled:false}}, animation:{duration:600, easing:"easeOutQuart"} }
+  });
+  document.getElementById("healthScoreNum").textContent = score;
+  document.getElementById("healthScoreNum").style.color = color;
+  let label = score >= 80 ? "Strong performance" : score >= 60 ? "Fair — needs a few fixes" : "At risk — needs attention";
+  document.getElementById("healthScoreLabel").textContent = label;
+}
+
+/* ======================================================================
+   RENDER: PERFORMANCE VIEW
+   ====================================================================== */
+function renderPerformance(){
+  const c = activeClient();
+  const months = monthsWithData(c);
+  const s = c.snapshot;
+  const profitTarget = (c.kpiScorecard.find(k=>k.category==="Profit")||{}).target;
+  const prevMonth = months.length>1 ? c.monthly[months[months.length-2]] : null;
+  const revDelta = prevMonth && prevMonth.income ? (s.revenue - prevMonth.income)/prevMonth.income : null;
+  const opexPctOfRev = s.revenue ? s.totalExpenses/s.revenue : 0;
+  document.getElementById("perfSnapshotStrip").innerHTML = `
+    <div class="stat-cell"><div class="k-label">Revenue</div><div class="k-value">${money(s.revenue)}</div>
+      ${revDelta!==null ? `<div class="k-delta ${revDelta>=0?'up':'down'}">${revDelta>=0?'+':''}${(revDelta*100).toFixed(1)}% vs prior month</div>` : ""}</div>
+    <div class="stat-cell"><div class="k-label">Gross Profit</div><div class="k-value">${money(s.grossProfit)}</div>
+      <div class="k-delta" style="color:var(--text-muted);">${pct(s.revenue ? s.grossProfit/s.revenue : 0)} margin</div></div>
+    <div class="stat-cell"><div class="k-label">Operating Expenses</div><div class="k-value">${money(s.totalExpenses)}</div>
+      <div class="k-delta" style="color:var(--text-muted);">${pct(opexPctOfRev)} of revenue</div></div>
+    <div class="stat-cell"><div class="k-label">Net Income</div><div class="k-value" style="color:${s.netIncome>=0?'var(--brand-strong)':'var(--red)'}">${money(s.netIncome)}</div>
+      <div class="k-delta ${profitTarget && s.profitMargin<profitTarget?'down':'up'}">${pct(s.profitMargin)} margin${profitTarget?` · target ${pct(profitTarget)}`:""}</div></div>
+  `;
+  renderChart("chartPerfTrend", "bar", {
+    labels: months,
+    datasets:[
+      {type:"bar", label:"Income", data:months.map(m=>c.monthly[m].income), backgroundColor:"oklch(0.53 0.125 154 / 0.85)", borderRadius:5},
+      {type:"bar", label:"Expenses", data:months.map(m=>c.monthly[m].totalExpenses), backgroundColor:"oklch(0.75 0.02 155)", borderRadius:5},
+      {type:"line", label:"Profit", data:months.map(m=>c.monthly[m].netIncome), borderColor:"oklch(0.58 0.19 26)", backgroundColor:"oklch(0.58 0.19 26)", tension:0.35, pointRadius:3},
+    ]
+  });
+
+  renderChart("chartKpiTrend", "line", {
+    labels: months,
+    datasets:[
+      {label:"Profit Margin %", data:months.map(m=>(c.monthly[m].profitMargin*100).toFixed(1)), borderColor:"oklch(0.58 0.19 26)", backgroundColor:"transparent", tension:0.3, pointRadius:3},
+      {label:"Team %", data:months.map(m=>(c.monthly[m].teamPct*100).toFixed(1)), borderColor:"oklch(0.53 0.125 154)", backgroundColor:"transparent", tension:0.3, pointRadius:3},
+      {label:"Marketing %", data:months.map(m=>(c.monthly[m].marketingPct*100).toFixed(1)), borderColor:"oklch(0.68 0.15 70)", backgroundColor:"transparent", tension:0.3, pointRadius:3},
+      {label:"Operations %", data:months.map(m=>(c.monthly[m].opsPct*100).toFixed(1)), borderColor:"oklch(0.5 0.02 240)", backgroundColor:"transparent", tension:0.3, pointRadius:3},
+    ]
+  }, {scales:{y:{ticks:{callback:v=>v+"%"}}}});
+
+  const tbl = document.getElementById("monthlyDetailTable");
+  tbl.innerHTML = `
+    <thead><tr><th>Metric</th>${months.map(m=>`<th class="num">${m.split(" ")[0]}</th>`).join("")}</tr></thead>
+    <tbody>
+      <tr><td class="row-label">Income</td>${months.map(m=>`<td class="num">${money(c.monthly[m].income)}</td>`).join("")}</tr>
+      <tr><td class="row-label">Products/COGS</td>${months.map(m=>`<td class="num">${money(c.monthly[m].cogs)}</td>`).join("")}</tr>
+      <tr><td class="row-label">Gross Profit</td>${months.map(m=>`<td class="num">${money(c.monthly[m].grossProfit)}</td>`).join("")}</tr>
+      <tr><td class="row-label">Total Expenses</td>${months.map(m=>`<td class="num">${money(c.monthly[m].totalExpenses)}</td>`).join("")}</tr>
+      <tr><td class="row-label">Net Income</td>${months.map(m=>`<td class="num" style="color:${c.monthly[m].netIncome<0?'var(--red)':'var(--brand-strong)'}">${money(c.monthly[m].netIncome)}</td>`).join("")}</tr>
+      <tr><td class="row-label">Profit Margin</td>${months.map(m=>`<td class="num">${pct(c.monthly[m].profitMargin)}</td>`).join("")}</tr>
+    </tbody>
+  `;
+
+  renderGaugeGrid(c);
+  renderExpenseMix(c);
+}
+
+function gaugeStatus(actual, target, direction){
+  if(direction === "Above"){
+    const ratio = target>0 ? actual/target : 1;
+    if(ratio>=1) return {ratio, color:"good"};
+    if(ratio>=0.7) return {ratio, color:"warn"};
+    return {ratio, color:"bad"};
+  }
+  const ratio = target>0 ? actual/target : 0;
+  if(ratio<=0.8) return {ratio, color:"good"};
+  if(ratio<=1) return {ratio, color:"warn"};
+  return {ratio, color:"bad"};
+}
+
+function renderGaugeGrid(c){
+  const directionByCategory = {"Profit":"Above", "Products/COGS":"Below", "Team":"Below", "Operations":"Below"};
+  const order = ["Profit","Products/COGS","Team","Operations"];
+  const items = order.map(cat => c.kpiScorecard.find(k=>k.category===cat)).filter(Boolean);
+  const grid = document.getElementById("gaugeGrid");
+  grid.innerHTML = items.map((k,i)=>`
+    <div class="gauge-card">
+      <div class="g-canvas"><canvas id="gauge-${i}"></canvas><div class="g-value" id="gaugeVal-${i}"></div></div>
+      <div class="g-label">${k.category}</div>
+      <div class="g-target">Target ${pct(k.target)}</div>
+    </div>
+  `).join("");
+  const colorMap = {good:"oklch(0.53 0.125 154)", warn:"oklch(0.68 0.15 70)", bad:"oklch(0.56 0.19 26)"};
+  items.forEach((k,i)=>{
+    const direction = directionByCategory[k.category] || "Below";
+    const st = gaugeStatus(k.actualPct, k.target, direction);
+    const color = colorMap[st.color];
+    const fillPct = Math.max(2, Math.min(st.ratio,1)*100);
+    const id = "gauge-"+i;
+    if(charts[id]) charts[id].destroy();
+    charts[id] = new Chart(document.getElementById(id), {
+      type:"doughnut",
+      data:{ datasets:[{ data:[fillPct, 100-fillPct], backgroundColor:[color, "oklch(0.93 0.006 155)"], borderWidth:0, cutout:"76%" }]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{enabled:false}}, animation:{duration:500, easing:"easeOutQuart"} }
+    });
+    document.getElementById("gaugeVal-"+i).innerHTML = `<span style="color:${color}">${pct(k.actualPct)}</span>`;
+  });
+}
+
+function renderExpenseMix(c){
+  document.getElementById("expenseMixDesc").textContent = c.reportingMonth + " · from the general ledger";
+  const canvas = document.getElementById("chartExpenseMix");
+  if(charts.chartExpenseMix){ charts.chartExpenseMix.destroy(); delete charts.chartExpenseMix; }
+  const items = c.expenseBreakdown || [];
+  if(!items.length){
+    const ctx2d = canvas.getContext("2d");
+    ctx2d.clearRect(0,0,canvas.width,canvas.height);
+    return;
+  }
+  const palette = ["oklch(0.53 0.125 154)","oklch(0.62 0.13 150 / 0.9)","oklch(0.7 0.1 145 / 0.85)","oklch(0.68 0.15 70)","oklch(0.78 0.11 80)","oklch(0.58 0.19 26)","oklch(0.68 0.14 25)","oklch(0.5 0.02 240)","oklch(0.65 0.04 240)","oklch(0.75 0.015 155)"];
+  charts.chartExpenseMix = new Chart(canvas, {
+    type:"doughnut",
+    data:{
+      labels: items.map(x=>x.label),
+      datasets:[{ data:items.map(x=>x.amount), backgroundColor: items.map((_,i)=>palette[i%palette.length]), borderWidth:0, cutout:"55%" }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:"right", labels:{boxWidth:9, boxHeight:9, usePointStyle:true, font:{size:11}, color:"#5b645f"} },
+        tooltip:{ callbacks:{ label:(ctx)=> ctx.label + ": " + money(ctx.parsed) } } },
+      animation:{duration:500, easing:"easeOutQuart"}
+    }
+  });
+}
+
+/* ======================================================================
+   RENDER: GOALS & BENCHMARKS
+   ====================================================================== */
+function renderGoals(){
+  const c = activeClient();
+  const tbl = document.getElementById("goalsTable");
+  tbl.innerHTML = `
+    <thead><tr><th>KPI</th><th class="num">Actual</th><th class="num">Target</th><th class="num">Difference</th><th>Status</th><th>Advisor Interpretation</th></tr></thead>
+    <tbody>
+    ${c.goalsBenchmarks.map(g=>`
+      <tr>
+        <td class="row-label">${g.kpi}</td>
+        <td class="num">${pct(g.actual)}</td>
+        <td class="num">${pct(g.target)}</td>
+        <td class="num" style="color:${(g.actual-g.target)<0 && g.kpi!=='Marketing' && g.kpi!=='Operations' ?'var(--red)':'var(--brand-strong)'}">${pct(g.actual-g.target)}</td>
+        <td>${statusPill(g.status)}</td>
+        <td style="color:var(--text-muted); font-size:12.5px;">${g.note}</td>
+      </tr>`).join("")}
+    </tbody>
+  `;
+  const gt = document.getElementById("clientGoalsTable");
+  gt.innerHTML = `
+    <thead><tr><th>Goal Type</th><th>Current</th><th>Goal</th><th>Due Date</th><th>Owner</th></tr></thead>
+    <tbody>
+    ${c.clientGoals.map(g=>`
+      <tr><td class="row-label">${g.type}</td><td>${g.current||'<span style="color:var(--text-faint)">Not set</span>'}</td><td>${g.goal||'<span style="color:var(--text-faint)">Not set</span>'}</td><td>${g.due||'—'}</td><td>${g.owner||'—'}</td></tr>
+    `).join("")}
+    </tbody>
+  `;
+
+  const barColors = c.goalsBenchmarks.map(g=>g.status==="Needs Attention" ? "oklch(0.56 0.19 26)" : "oklch(0.53 0.125 154)");
+  renderChart("chartGoalsBar", "bar", {
+    labels: c.goalsBenchmarks.map(g=>g.kpi),
+    datasets:[
+      {label:"Actual", data:c.goalsBenchmarks.map(g=>(g.actual*100).toFixed(1)), backgroundColor:barColors, borderRadius:5},
+      {label:"Target", data:c.goalsBenchmarks.map(g=>(g.target*100).toFixed(1)), backgroundColor:"oklch(0.88 0.01 155)", borderRadius:5},
+    ]
+  }, {indexAxis:"y", scales:{x:{ticks:{callback:v=>v+"%"}}}});
+
+  const guidanceMap = {"Products/COGS":"Products/COGS","Team":"Team","Marketing":"Marketing","Operations":"Operations","Profit Margin":"Net Income"};
+  document.getElementById("guidanceList").innerHTML = TARGET_GUIDANCE.map(t=>{
+    const kpiName = Object.keys(guidanceMap).find(k=>guidanceMap[k]===t.category) || t.category;
+    return `
+    <div class="guidance-row">
+      <div class="guidance-cat">${kpiName}</div>
+      <div class="guidance-dir">${t.direction} target</div>
+      <div class="guidance-text">${t.guidance}</div>
+    </div>`;
+  }).join("");
+}
+
+/* ======================================================================
+   RENDER: CASH & DEBT
+   ====================================================================== */
+function renderCashDebt(){
+  const c = activeClient();
+  const d = c.debt;
+  document.getElementById("debtStrip").innerHTML = `
+    <div class="stat-cell"><div class="k-label">Total Debt</div><div class="k-value">${money(d.totalDebt)}</div></div>
+    <div class="stat-cell"><div class="k-label">Monthly Debt Service</div><div class="k-value">${money(d.monthlyDebtService)}</div></div>
+    <div class="stat-cell"><div class="k-label">High-Interest Debt</div><div class="k-value">${money(d.highInterestDebt)}</div></div>
+    <div class="stat-cell"><div class="k-label">Weighted Avg APR</div><div class="k-value">${pct(d.weightedAPR)}</div></div>
+    <div class="stat-cell"><div class="k-label">Debt Service % / Target</div><div class="k-value" style="font-size:19px;">${pct(d.debtServicePct)} <span style="font-size:13px; color:var(--text-faint);">/ ${pct(d.industryTarget)}</span></div></div>
+  `;
+  renderDebtTable();
+}
+function renderDebtTable(){
+  const c = activeClient();
+  const tbl = document.getElementById("debtTable");
+  if(c.debt.register.length === 0){
+    tbl.innerHTML = `<tbody><tr><td colspan="8" style="padding:0;"><div class="empty-state">No debt balances entered yet. Use "+ Add debt" to build the register.</div></td></tr></tbody>`;
+    return;
+  }
+  tbl.innerHTML = `
+    <thead><tr><th>Debt Name</th><th>Lender</th><th>Type</th><th class="num">Current Balance</th><th class="num">Payment</th><th class="num">APR</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    ${c.debt.register.map((r,i)=>`
+      <tr>
+        <td class="row-label">${r.name}</td><td>${r.lender}</td><td>${r.type}</td>
+        <td class="num">${money(r.balance)}</td><td class="num">${money(r.payment)}</td><td class="num">${pct(r.apr)}</td>
+        <td>${statusPill(r.apr>=0.15?"Needs Attention":"On Target")}</td>
+        <td><button class="toggle-btn" onclick="removeDebtRow(${i})">Remove</button></td>
+      </tr>`).join("")}
+    </tbody>
+  `;
+}
+function addDebtRow(){
+  const c = activeClient();
+  const name = prompt("Debt name (e.g. Truist Term Loan):");
+  if(!name) return;
+  const lender = prompt("Lender:","") || "—";
+  const balance = parseFloat(prompt("Current balance ($):","0")) || 0;
+  const payment = parseFloat(prompt("Monthly payment ($):","0")) || 0;
+  const apr = (parseFloat(prompt("APR (%):","0")) || 0) / 100;
+  c.debt.register.push({name, lender, type:"Loan", balance, payment, apr});
+  c.debt.totalDebt = c.debt.register.reduce((a,r)=>a+r.balance,0);
+  c.debt.monthlyDebtService = c.debt.register.reduce((a,r)=>a+r.payment,0);
+  c.debt.highInterestDebt = c.debt.register.filter(r=>r.apr>=0.15).reduce((a,r)=>a+r.balance,0);
+  const totalBal = c.debt.totalDebt || 1;
+  c.debt.weightedAPR = c.debt.register.reduce((a,r)=>a + r.apr*(r.balance/totalBal), 0);
+  c.debt.debtServicePct = c.snapshot.revenue ? c.debt.monthlyDebtService / c.snapshot.revenue : 0;
+  c.debt.status = "In progress";
+  renderCashDebt();
+  toast("Debt added");
+}
+function removeDebtRow(i){
+  const c = activeClient();
+  c.debt.register.splice(i,1);
+  c.debt.totalDebt = c.debt.register.reduce((a,r)=>a+r.balance,0);
+  c.debt.monthlyDebtService = c.debt.register.reduce((a,r)=>a+r.payment,0);
+  renderCashDebt();
+}
+
+/* ======================================================================
+   RENDER: RECOMMENDATIONS
+   ====================================================================== */
+function recIconSvg(area){
+  const icons = {
+    Profit: '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+    Operations: '<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82 2 2 0 11-2.83 2.83 1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33 2 2 0 11-2.83-2.83 1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82 2 2 0 112.83-2.83 1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33 2 2 0 112.83 2.83 1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.2"/>',
+    Team: '<circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M3 20c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="17" cy="9" r="2.3" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 14c2.5.3 4.5 2 4.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+    "Debt / Team": '<circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M3 20c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+    Debt: '<rect x="3" y="10" width="18" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 10l9-6 9 6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M7 13.5v4M12 13.5v4M17 13.5v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+    Marketing: '<path d="M3 11v2a2 2 0 002 2h1l3.5 4V5L6 9H5a2 2 0 00-2 2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 8.5a4 4 0 010 7M17 5.5a8 8 0 010 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+    Setup: '<path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  };
+  return icons[area] || '<circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/>';
+}
+function recIconClass(area){
+  const map = {Profit:"i-profit", Operations:"i-operations", Team:"i-team", Debt:"i-debt", "Debt / Team":"i-debt", Marketing:"i-marketing", Setup:"i-operations"};
+  return map[area] || "i-operations";
+}
+
+function renderRecommendations(){
+  const c = activeClient();
+  const order = {High:0, Medium:1, Low:2};
+  const sorted = [...c.recommendations].sort((a,b)=>order[a.priority]-order[b.priority]);
+  const openCount = c.recommendations.filter(r=>r.status!=="Resolved").length;
+  const highCount = c.recommendations.filter(r=>r.priority==="High" && r.status!=="Resolved").length;
+  document.getElementById("insightSub").textContent = `${openCount} item${openCount===1?'':'s'} flagged for ${c.name}, ${highCount} high priority`;
+  document.getElementById("insightMeta").textContent = "analyzed " + c.reportingMonth.toLowerCase();
+
+  document.getElementById("recList").innerHTML = sorted.map((r)=>{
+    const idx = c.recommendations.indexOf(r);
+    const resolved = r.status === "Resolved";
+    return `
+    <div class="rec-item ${resolved?'resolved':''}">
+      <div class="rec-icon ${recIconClass(r.area)}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none">${recIconSvg(r.area)}</svg></div>
+      <div class="rec-main">
+        <div class="rec-top">${priorityPill(r.priority)}<span class="rec-area">${r.area}</span></div>
+        <div class="rec-issue">${r.issue}</div>
+        <div class="rec-meta"><b>Impact:</b> ${r.impact}</div>
+        <div class="rec-meta"><b>Focus:</b> ${r.focus}</div>
+        <div class="rec-source">source: ${c.reportingMonth.toLowerCase()} P&amp;L vs. ${c.industry.toLowerCase()} target</div>
+      </div>
+      <button class="toggle-btn ${resolved?'is-resolved':'is-open'}" onclick="toggleRec(${idx})">${resolved?'Reopen':'Mark resolved'}</button>
+    </div>`;
+  }).join("");
+}
+function toggleRec(i){
+  const c = activeClient();
+  c.recommendations[i].status = c.recommendations[i].status === "Resolved" ? "Open" : "Resolved";
+  renderRecommendations();
+}
+
+/* ======================================================================
+   RENDER: ADVISOR NOTES
+   ====================================================================== */
+function renderNotes(){
+  const c = activeClient();
+  const wrap = document.getElementById("notesList");
+  if(c.advisorNotes.length === 0){
+    wrap.innerHTML = `<div class="empty-state">No meeting notes logged yet for ${c.name}.</div>`;
+    return;
+  }
+  wrap.innerHTML = c.advisorNotes.slice().reverse().map(n=>`
+    <div class="panel" style="margin-bottom:12px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+        <strong style="font-size:13px;">${n.date || "Undated"}</strong>
+        <span style="font-size:11.5px; color:var(--text-faint);">${n.owner || ""}</span>
+      </div>
+      <div style="font-size:13px; margin-bottom:4px;"><b style="color:var(--brand-strong);">Win:</b> ${n.win || "—"}</div>
+      <div style="font-size:13px; margin-bottom:4px;"><b style="color:var(--red);">Risk:</b> ${n.risk || "—"}</div>
+      <div style="font-size:13px; margin-bottom:4px;"><b>Decision:</b> ${n.decision || "—"}</div>
+      <div style="font-size:13px;"><b>Action:</b> ${n.action || "—"} ${n.due ? "· due " + n.due : ""}</div>
+    </div>
+  `).join("");
+}
+function addNote(){
+  const c = activeClient();
+  const note = {
+    date: document.getElementById("noteDate").value,
+    win: document.getElementById("noteWin").value,
+    risk: document.getElementById("noteRisk").value,
+    decision: document.getElementById("noteDecision").value,
+    action: document.getElementById("noteAction").value,
+    owner: document.getElementById("noteOwner").value,
+    due: document.getElementById("noteDue").value,
+  };
+  if(!note.win && !note.risk && !note.decision && !note.action){
+    toast("Add at least one field before saving");
+    return;
+  }
+  c.advisorNotes.push(note);
+  ["noteDate","noteWin","noteRisk","noteDecision","noteAction","noteOwner","noteDue"].forEach(id=>document.getElementById(id).value="");
+  renderNotes();
+  toast("Note saved");
+}
+
+/* ======================================================================
+   RENDER: CLIENT INTAKE
+   ====================================================================== */
+function renderIntake(){
+  const sel = document.getElementById("inIndustry");
+  if(sel.options.length === 0){
+    sel.innerHTML = INDUSTRY_PROFILES.map(p=>`<option value="${p.industry}">${p.industry}</option>`).join("") + `<option value="Custom">Custom</option>`;
+  }
+  document.getElementById("clientCount").textContent = clients.length;
+  document.getElementById("clientListWrap").innerHTML = clients.map(c=>`
+    <div class="client-row">
+      <div class="ca">${initials(c.name)}</div>
+      <div>
+        <div class="cn">${c.name}</div>
+        <div class="ci">${c.industry} · ${c.reportingMonth} · ${c.entityType||"—"}</div>
+      </div>
+      <div class="spacer"></div>
+      ${c.id===activeClientId ? '<span class="pill good">Active</span>' : `<button class="btn btn-ghost btn-sm" onclick="switchClient('${c.id}')">Switch</button>`}
+    </div>
+  `).join("");
+}
+
+function emptyClient(name, industry, entity, month, plan, prepared){
+  const profile = INDUSTRY_PROFILES.find(p=>p.industry===industry) || INDUSTRY_PROFILES[INDUSTRY_PROFILES.length-1];
+  return {
+    id: name.toLowerCase().replace(/[^a-z0-9]+/g,"-") + "-" + Date.now(),
+    name, industry, entityType: entity || "—", reportingMonth: month || "—",
+    preparedBy: prepared || "MBK Financial Services", plan: plan || "—",
+    monthly: {},
+    snapshot: {revenue:0, grossProfit:0, totalExpenses:0, netIncome:0, profitMargin:0, healthScore:0},
+    kpiScorecard: [
+      {category:"Products/COGS", actualDollar:0, actualPct:0, target:profile.cogs, varianceDollar:0, status:"Not Scored", score:0, maxScore:20},
+      {category:"Team", actualDollar:0, actualPct:0, target:profile.team, varianceDollar:0, status:"Not Scored", score:0, maxScore:20},
+      {category:"Marketing", actualDollar:0, actualPct:0, target:profile.marketing, varianceDollar:0, status:"Not Scored", score:0, maxScore:10},
+      {category:"Operations", actualDollar:0, actualPct:0, target:profile.operations, varianceDollar:0, status:"Not Scored", score:0, maxScore:20},
+      {category:"Profit", actualDollar:0, actualPct:0, target:profile.profit, varianceDollar:0, status:"Not Scored", score:0, maxScore:20},
+      {category:"Revenue Trend", actualDollar:0, actualPct:0, target:0, varianceDollar:0, status:"Not Scored", score:0, maxScore:10},
+      {category:"Debt Service", actualDollar:0, actualPct:0, target:profile.debtService, varianceDollar:0, status:"Not Scored", score:0, maxScore:10},
+    ],
+    topPriorities: [
+      {priority:1, area:"Setup", stat:"No monthly data entered yet", focus:"Upload a workbook or enter monthly income and expenses to activate scoring."},
+    ],
+    goalsBenchmarks: [
+      {kpi:"Products/COGS", actual:0, target:profile.cogs, status:"Not Scored", note:"Awaiting data."},
+      {kpi:"Team", actual:0, target:profile.team, status:"Not Scored", note:"Awaiting data."},
+      {kpi:"Marketing", actual:0, target:profile.marketing, status:"Not Scored", note:"Awaiting data."},
+      {kpi:"Operations", actual:0, target:profile.operations, status:"Not Scored", note:"Awaiting data."},
+      {kpi:"Profit Margin", actual:0, target:profile.profit, status:"Not Scored", note:"Awaiting data."},
+    ],
+    clientGoals: [
+      {type:"Revenue", current:"", goal:"", due:"", owner:""},
+      {type:"Profit", current:"", goal:"", due:"", owner:""},
+      {type:"Cash Reserve", current:"", goal:"", due:"", owner:""},
+      {type:"Debt Reduction", current:"", goal:"", due:"", owner:""},
+    ],
+    debt: {totalDebt:0, monthlyDebtService:0, highInterestDebt:0, weightedAPR:0, debtServicePct:0, industryTarget:profile.debtService, status:"Not entered", register:[]},
+    expenseBreakdown: [],
+    recommendations: [
+      {priority:"Medium", area:"Setup", issue:"Client workbook not yet uploaded.", impact:"No performance scoring is possible until monthly data is entered.", focus:"Upload the client's MBK workbook or enter data manually.", status:"Open"},
+    ],
+    advisorNotes: [],
+  };
+}
+
+function createManualClient(){
+  const name = document.getElementById("inClientName").value.trim();
+  if(!name){ toast("Enter a client name first"); return; }
+  const industry = document.getElementById("inIndustry").value;
+  const entity = document.getElementById("inEntity").value.trim();
+  const month = document.getElementById("inMonth").value.trim();
+  const plan = document.getElementById("inPlan").value.trim();
+  const prepared = document.getElementById("inPrepared").value.trim();
+  const c = emptyClient(name, industry, entity, month, plan, prepared);
+  clients.push(c);
+  activeClientId = c.id;
+  ["inClientName","inEntity","inMonth","inPlan"].forEach(id=>document.getElementById(id).value="");
+  renderClientChrome();
+  renderIntake();
+  toast(name + " created");
+  go("dashboard");
+}
+
+/* ---- Excel (.xlsx) intake parsing ---- */
+function findRow(rows, matchFn){
+  for(let i=0;i<rows.length;i++){ if(rows[i] && matchFn(rows[i])) return i; }
+  return -1;
+}
+function sheetRows(wb, name){
+  const ws = wb.Sheets[name];
+  if(!ws) return null;
+  return XLSX.utils.sheet_to_json(ws, {header:1, defval:null});
+}
+function num(v){ const n = typeof v === "string" ? parseFloat(v.replace(/[^0-9.\-]/g,"")) : v; return isNaN(n) ? 0 : n; }
+
+function parseWorkbook(wb){
+  const settingsRows = sheetRows(wb, "Settings") || [];
+  const get = (label) => {
+    const i = findRow(settingsRows, r => r[0] === label);
+    return i >= 0 ? settingsRows[i][1] : null;
+  };
+  const name = get("Client Name") || "New Client";
+  const industry = get("Industry") || "Custom";
+  const entity = get("Entity Type") || "—";
+  const month = get("Reporting Month") || "—";
+  const prepared = get("Prepared By") || "MBK Financial Services";
+  const plan = get("Client Plan") || "—";
+
+  const c = emptyClient(name, industry, entity, month, plan, prepared);
+  c.id = "import-" + Date.now();
+
+  // Monthly Data
+  const md = sheetRows(wb, "Monthly Data");
+  if(md){
+    const header = md[0];
+    const monthCols = header.slice(1);
+    const metricIdx = {};
+    md.forEach((row,i)=>{ if(row[0]) metricIdx[row[0]] = i; });
+    monthCols.forEach((label, colOffset)=>{
+      if(!label) return;
+      const col = colOffset + 1;
+      const income = num(md[metricIdx["Income"]] ? md[metricIdx["Income"]][col] : 0);
+      if(!income) return;
+      c.monthly[label] = {
+        income,
+        cogs: num(md[metricIdx["Products/COGS"]]?.[col]),
+        grossProfit: num(md[metricIdx["Gross Profit"]]?.[col]),
+        team: num(md[metricIdx["Team"]]?.[col]),
+        marketing: num(md[metricIdx["Marketing"]]?.[col]),
+        overhead: num(md[metricIdx["Overhead"]]?.[col]),
+        operations: num(md[metricIdx["Operations"]]?.[col]),
+        totalExpenses: num(md[metricIdx["Total Expenses"]]?.[col]),
+        netIncome: num(md[metricIdx["Net Income"]]?.[col]),
+        gpMargin: num(md[metricIdx["Gross Profit Margin"]]?.[col]),
+        profitMargin: num(md[metricIdx["Profit Margin"]]?.[col]),
+        teamPct: num(md[metricIdx["Team %"]]?.[col]),
+        marketingPct: num(md[metricIdx["Marketing %"]]?.[col]),
+        opsPct: num(md[metricIdx["Operations %"]]?.[col]),
+      };
+    });
+  }
+
+  // Dashboard sheet: snapshot + KPI scorecard + priorities
+  const dash = sheetRows(wb, "Dashboard");
+  if(dash){
+    const snapIdx = findRow(dash, r => (r[0]||"").toString().includes("Financial Snapshot"));
+    if(snapIdx >= 0 && dash[snapIdx+2]){
+      const vals = dash[snapIdx+2];
+      c.snapshot = {
+        revenue: num(vals[0]), grossProfit: num(vals[2]), totalExpenses: num(vals[4]),
+        netIncome: num(vals[6]), profitMargin: num(vals[8]), healthScore: num(vals[10]) || 0,
+      };
+    }
+    const kpiHeadIdx = findRow(dash, r => r[0] === "Category" && r[1] === "Actual $");
+    if(kpiHeadIdx >= 0){
+      const rows = [];
+      for(let i=kpiHeadIdx+1; i<dash.length; i++){
+        const r = dash[i];
+        if(!r[0] || (r[0]||"").toString().includes("Top Priorities")) break;
+        rows.push({category:r[0], actualDollar:num(r[1]), actualPct:num(r[2]), target:num(r[3]), varianceDollar:num(r[4]), status:r[5]||"Not Scored", score:num(r[6]), maxScore:20});
+      }
+      if(rows.length) c.kpiScorecard = rows;
+    }
+    const prIdx = findRow(dash, r => r[0] === "Priority" && r[1] === "Area");
+    if(prIdx >= 0){
+      const rows = [];
+      for(let i=prIdx+1; i<dash.length; i++){
+        const r = dash[i];
+        if(!r[0] || typeof r[0] !== "number") break;
+        rows.push({priority:r[0], area:r[1], stat:r[2], focus:r[5]});
+      }
+      if(rows.length) c.topPriorities = rows;
+    }
+  }
+
+  // Goals & Benchmarks
+  const gb = sheetRows(wb, "Goals & Benchmarks");
+  if(gb){
+    const headIdx = findRow(gb, r => r[0]==="KPI" && r[1]==="Actual");
+    if(headIdx >= 0){
+      const rows = [];
+      for(let i=headIdx+1; i<gb.length; i++){
+        const r = gb[i];
+        if(!r[0] || r[0]==="Goal Type") break;
+        rows.push({kpi:r[0], actual:num(r[1]), target:num(r[2]), status:r[4]||"Not Scored", note:r[5]||""});
+      }
+      if(rows.length) c.goalsBenchmarks = rows;
+    }
+  }
+
+  // Recommendations
+  const rec = sheetRows(wb, "Recommendations");
+  if(rec){
+    const headIdx = findRow(rec, r => r[0]==="Priority" && r[1]==="Area");
+    if(headIdx >= 0){
+      const rows = [];
+      for(let i=headIdx+1; i<rec.length; i++){
+        const r = rec[i];
+        if(!r[0]) continue;
+        rows.push({priority:r[0], area:r[1], issue:r[2], impact:r[3], focus:r[4], status:r[5]||"Open"});
+      }
+      if(rows.length) c.recommendations = rows;
+    }
+  }
+
+  // Cash & Debt
+  const cd = sheetRows(wb, "Cash & Debt");
+  if(cd && cd[3] && cd[4]){
+    c.debt.totalDebt = num(cd[3][1]);
+    c.debt.debtServicePct = num(cd[3][4]);
+    c.debt.monthlyDebtService = num(cd[4][1]);
+    c.debt.industryTarget = num(cd[4][4]);
+    c.debt.highInterestDebt = num(cd[5]?.[1]);
+    c.debt.status = cd[5]?.[4] || "Not entered";
+    c.debt.weightedAPR = num(cd[6]?.[1]);
+    const headIdx = findRow(cd, r => r[0]==="Debt Name" && r[1]==="Lender");
+    if(headIdx >= 0){
+      const rows = [];
+      for(let i=headIdx+1; i<cd.length; i++){
+        const r = cd[i];
+        if(!r[0] || num(r[4]) === 0) continue;
+        rows.push({name:r[0], lender:r[1], type:r[2], balance:num(r[4]), payment:num(r[5]), apr:num(r[6])});
+      }
+      c.debt.register = rows;
+    }
+  }
+
+  // fall back snapshot from most recent month if Dashboard sheet missing
+  const monthsAvail = Object.keys(c.monthly);
+  if(c.snapshot.revenue === 0 && monthsAvail.length){
+    const last = c.monthly[monthsAvail[monthsAvail.length-1]];
+    c.snapshot = {revenue:last.income, grossProfit:last.grossProfit, totalExpenses:last.totalExpenses, netIncome:last.netIncome, profitMargin:last.profitMargin, healthScore:0};
+  }
+
+  return c;
+}
+
+function handleWorkbookFile(file){
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try{
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:"array", cellDates:false});
+      const client = parseWorkbook(wb);
+      clients.push(client);
+      activeClientId = client.id;
+      renderClientChrome();
+      renderIntake();
+      toast("Imported " + client.name + " from workbook");
+      go("dashboard");
+    }catch(err){
+      console.error(err);
+      toast("Could not parse that workbook — check it matches the MBK template");
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+/* ======================================================================
+   RENDER: INDUSTRY BENCHMARKS
+   ====================================================================== */
+function renderBenchmarks(){
+  const c = activeClient();
+  const tbl = document.getElementById("benchmarkTable");
+  tbl.innerHTML = `
+    <thead><tr><th>Industry</th><th class="num">COGS</th><th class="num">Team</th><th class="num">Occupancy</th><th class="num">Marketing</th><th class="num">Operations</th><th class="num">Profit</th><th class="num">Debt Service</th><th class="num">Cash Reserve</th></tr></thead>
+    <tbody>
+    ${INDUSTRY_PROFILES.map(p=>`
+      <tr class="${p.industry===c.industry?'benchmark-highlight':''}">
+        <td class="row-label">${p.industry}${p.industry===c.industry?' <span class="pill good" style="margin-left:6px;">Current</span>':''}</td>
+        <td class="num">${pct(p.cogs)}</td><td class="num">${pct(p.team)}</td><td class="num">${pct(p.occupancy)}</td>
+        <td class="num">${pct(p.marketing)}</td><td class="num">${pct(p.operations)}</td><td class="num">${pct(p.profit)}</td>
+        <td class="num">${pct(p.debtService)}</td><td class="num">${p.cashReserve} mo</td>
+      </tr>`).join("")}
+    </tbody>
+  `;
+}
+
+/* ======================================================================
+   CHART HELPER
+   ====================================================================== */
+function renderChart(canvasId, type, data, extraOptions={}){
+  const ctx = document.getElementById(canvasId);
+  if(charts[canvasId]) charts[canvasId].destroy();
+  charts[canvasId] = new Chart(ctx, {
+    type, data,
+    options: Object.assign({
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:"index", intersect:false},
+      animation:{duration:500, easing:"easeOutQuart"},
+      plugins:{ legend:{ position:"bottom", labels:{boxWidth:10, boxHeight:10, usePointStyle:true, font:{size:11.5}, color:"#5b645f"} } },
+      scales:{
+        x:{ grid:{display:false}, ticks:{color:"#8a938d", font:{size:11.5}} },
+        y:{ grid:{color:"#eef0ee"}, ticks:{color:"#8a938d", font:{size:11.5}} },
+      }
+    }, extraOptions)
+  });
+}
+
+/* ======================================================================
+   RENDER DISPATCH
+   ====================================================================== */
+function renderView(view){
+  renderClientChrome();
+  if(view==="dashboard") renderDashboard();
+  else if(view==="performance") renderPerformance();
+  else if(view==="goals") renderGoals();
+  else if(view==="cashdebt") renderCashDebt();
+  else if(view==="recommendations") renderRecommendations();
+  else if(view==="notes") renderNotes();
+  else if(view==="intake") renderIntake();
+  else if(view==="benchmarks") renderBenchmarks();
+}
+
+/* ======================================================================
+   DROPZONE WIRING
+   ====================================================================== */
+const dropzone = document.getElementById("dropzone");
+const fileInput = document.getElementById("fileInput");
+dropzone.addEventListener("click", ()=>fileInput.click());
+fileInput.addEventListener("change", (e)=>{ if(e.target.files[0]) handleWorkbookFile(e.target.files[0]); });
+["dragenter","dragover"].forEach(evt=>dropzone.addEventListener(evt, (e)=>{ e.preventDefault(); dropzone.classList.add("drag"); }));
+["dragleave","drop"].forEach(evt=>dropzone.addEventListener(evt, (e)=>{ e.preventDefault(); dropzone.classList.remove("drag"); }));
+dropzone.addEventListener("drop", (e)=>{ const f = e.dataTransfer.files[0]; if(f) handleWorkbookFile(f); });
+
+/* ======================================================================
+   INIT
+   ====================================================================== */
+go("dashboard");
+</script>
+</body>
+</html>
