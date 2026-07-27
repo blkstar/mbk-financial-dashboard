@@ -263,6 +263,22 @@ button{font-family:inherit;}
 .topbar h1{font-size:21px;}
 .topbar .sub{font-size:12.5px; color:var(--text-muted); margin-top:2px;}
 .topbar-actions{display:flex; align-items:center; gap:10px;}
+.topbar-left{display:flex; align-items:center; gap:12px; min-width:0;}
+
+.menu-toggle{
+  display:none; align-items:center; justify-content:center; flex:none;
+  width:36px; height:36px; border-radius:8px;
+  border:1px solid var(--border); background:var(--panel); color:var(--text);
+  cursor:pointer; transition:background 0.15s var(--ease);
+}
+.menu-toggle:hover{background:var(--gray-soft);}
+.menu-toggle:active{transform:scale(0.96);}
+
+.sidebar-backdrop{
+  position:fixed; inset:0; z-index:55; display:none;
+  background:oklch(0.2 0.02 155 / 0.4);
+}
+.sidebar-backdrop.open{display:block;}
 
 .btn{
   display:inline-flex; align-items:center; gap:7px;
@@ -442,9 +458,16 @@ table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
 .benchmark-highlight td{background:var(--brand-soft) !important;}
 
 @media (max-width:860px){
-  .sidebar{position:fixed; left:0; top:0; transform:translateX(-100%); z-index:60; box-shadow:var(--shadow-lg);}
+  .sidebar{position:fixed; left:0; top:0; transform:translateX(-100%); z-index:60; box-shadow:var(--shadow-lg); transition:transform 0.22s var(--ease);}
   .sidebar.open{transform:translateX(0);}
   .view, .topbar{padding-left:18px; padding-right:18px;}
+  .menu-toggle{display:inline-flex;}
+  .topbar h1{font-size:18px;}
+  .topbar-actions .btn span, .topbar-actions .btn{white-space:nowrap;}
+}
+
+@media (max-width:520px){
+  .topbar-actions .btn:first-child{display:none;}
 }
 </style>
 </head>
@@ -529,11 +552,18 @@ table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
     </div>
   </aside>
 
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
   <div class="main">
     <div class="topbar">
-      <div>
-        <h1 id="pageTitle">Dashboard</h1>
-        <div class="sub" id="pageSub">Financial snapshot for the selected reporting period</div>
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="Open navigation menu">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <div>
+          <h1 id="pageTitle">Dashboard</h1>
+          <div class="sub" id="pageSub">Financial snapshot for the selected reporting period</div>
+        </div>
       </div>
       <div class="topbar-actions">
         <button class="btn btn-ghost" onclick="window.print()">
@@ -973,8 +1003,17 @@ function go(view){
   const [title, sub] = PAGE_META[view];
   document.getElementById("pageTitle").textContent = title;
   document.getElementById("pageSub").textContent = sub;
-  if(window.innerWidth <= 860) document.getElementById("sidebar").classList.remove("open");
+  if(window.innerWidth <= 860) closeSidebar();
   renderView(view);
+}
+
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("sidebarBackdrop").classList.toggle("open");
+}
+function closeSidebar(){
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("sidebarBackdrop").classList.remove("open");
 }
 
 document.querySelectorAll(".nav-item").forEach(item=>{
