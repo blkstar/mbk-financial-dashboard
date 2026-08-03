@@ -300,6 +300,15 @@ button{font-family:inherit;}
 .view{padding:26px 32px 60px; max-width:1360px;}
 .view[hidden]{display:none;}
 
+/* ---------- Load-in motion ---------- */
+@keyframes fade-rise{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+.view .panel, .view .stat-cell{ animation:fade-rise 0.42s var(--ease) backwards; }
+.view .stat-strip .stat-cell:nth-child(1){animation-delay:0.02s;}
+.view .stat-strip .stat-cell:nth-child(2){animation-delay:0.08s;}
+.view .stat-strip .stat-cell:nth-child(3){animation-delay:0.14s;}
+.view .stat-strip .stat-cell:nth-child(4){animation-delay:0.20s;}
+.view .stat-strip .stat-cell:nth-child(5){animation-delay:0.26s;}
+
 /* ---------- Utility layout ---------- */
 .stat-strip{
   display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));
@@ -469,6 +478,40 @@ table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
 @media (max-width:520px){
   .topbar-actions .btn:first-child{display:none;}
 }
+
+/* ---------- Print / PDF export ---------- */
+.print-header{display:none;}
+@media print{
+  @page{ margin:0.55in; }
+  *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  body{ background:white; font-size:11.5px; }
+  .sidebar, .sidebar-backdrop, .menu-toggle, .topbar-actions,
+  .popover-backdrop, .client-popover, #toast-host,
+  .toggle-btn, .dropzone, .nav-badge{ display:none !important; }
+  .topbar{ position:static; padding:0 0 10px; backdrop-filter:none; background:transparent; border-bottom:2px solid var(--ink); }
+  .view{ padding:0; max-width:none; }
+  .print-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-bottom:12px; margin-bottom:16px; border-bottom:2px solid var(--ink);
+  }
+  .print-header .ph-brand{
+    display:flex; align-items:center; gap:10px;
+    background:var(--ink); padding:8px 14px; border-radius:8px;
+  }
+  .print-header .ph-brand img{ height:26px; width:auto; display:block; }
+  .print-header .ph-meta{ text-align:right; }
+  .print-header .ph-name{ font-size:13px; font-weight:700; color:var(--text); }
+  .print-header .ph-sub{ font-size:10.5px; color:var(--text-muted); margin-top:2px; }
+  .print-header .ph-date{ font-size:10px; color:var(--text-faint); margin-top:2px; }
+  .panel, .stat-cell, .gauge-card, .rec-item, .priority-item, .guidance-row{ break-inside:avoid; }
+  .view .panel, .view .stat-cell{ animation:none !important; opacity:1 !important; transform:none !important; }
+  .section{ break-inside:avoid-page; }
+  .chart-box{ height:220px; }
+  .chart-box.tall{ height:260px; }
+  .insight-banner{ background:var(--panel); color:var(--text); border:1px solid var(--border); }
+  .insight-banner .insight-sub{ color:var(--text-muted); }
+  .insight-banner .insight-meta{ color:var(--text-faint); }
+}
 </style>
 </head>
 <body>
@@ -555,6 +598,16 @@ table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
   <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
 
   <div class="main">
+    <div class="print-header">
+      <div class="ph-brand">
+        <img src="mbk-logo.png" alt="MBK Financial Services">
+      </div>
+      <div class="ph-meta">
+        <div class="ph-name" id="printClientName">Alky's LLC</div>
+        <div class="ph-sub" id="printClientSub">Liquor Store · Jun 2026</div>
+        <div class="ph-date" id="printDate">Generated —</div>
+      </div>
+    </div>
     <div class="topbar">
       <div class="topbar-left">
         <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="Open navigation menu">
@@ -982,6 +1035,39 @@ function monthsWithData(client){
 }
 
 /* ======================================================================
+   LOAD ANIMATION: number count-up
+   ====================================================================== */
+function prefersReducedMotion(){
+  return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+function formatCount(val, format){
+  if(format === "pct") return pct(val, 1);
+  if(format === "int") return Math.round(val).toString();
+  return money(val);
+}
+function tweenNumber(el, target, format, delay=0, duration=700){
+  if(!el || isNaN(target)) return;
+  if(prefersReducedMotion()){ el.textContent = formatCount(target, format); return; }
+  const start = performance.now();
+  function frame(now){
+    const elapsed = now - start;
+    if(elapsed < delay){ requestAnimationFrame(frame); return; }
+    const t = Math.min(1, (elapsed - delay) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = formatCount(target * eased, format);
+    if(t < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+function animateCounters(container, duration=700){
+  const els = container.querySelectorAll("[data-count]");
+  els.forEach((el, i)=>{
+    const target = parseFloat(el.dataset.count);
+    tweenNumber(el, target, el.dataset.format || "money", i*70, duration);
+  });
+}
+
+/* ======================================================================
    RENDER: NAV / TOPBAR / CLIENT SWITCHER
    ====================================================================== */
 const PAGE_META = {
@@ -1033,6 +1119,10 @@ function renderClientChrome(){
   document.getElementById("perfDesc").textContent = c.name + " · Year to date";
   document.getElementById("goalsDesc").textContent = c.industry + " · " + c.reportingMonth;
   document.getElementById("prioritiesDesc").textContent = "What to lead with in the " + c.reportingMonth + " advisory meeting";
+
+  document.getElementById("printClientName").textContent = c.name;
+  document.getElementById("printClientSub").textContent = c.industry + " · " + c.reportingMonth;
+  document.getElementById("printDate").textContent = "Generated " + new Date().toLocaleDateString("en-US", {year:"numeric", month:"short", day:"numeric"});
 
   document.getElementById("miniRevenue").textContent = money(c.snapshot.revenue);
   const healthEl = document.getElementById("miniHealth");
@@ -1090,12 +1180,13 @@ function renderDashboard(){
   const s = c.snapshot;
   const strip = document.getElementById("snapshotStrip");
   strip.innerHTML = `
-    <div class="stat-cell"><div class="k-label">Revenue</div><div class="k-value">${money(s.revenue)}</div></div>
-    <div class="stat-cell"><div class="k-label">Gross Profit</div><div class="k-value">${money(s.grossProfit)}</div></div>
-    <div class="stat-cell"><div class="k-label">Total Expenses</div><div class="k-value">${money(s.totalExpenses)}</div></div>
-    <div class="stat-cell"><div class="k-label">Net Income</div><div class="k-value" style="color:${s.netIncome>=0?'var(--brand-strong)':'var(--red)'}">${money(s.netIncome)}</div></div>
-    <div class="stat-cell"><div class="k-label">Profit Margin</div><div class="k-value">${pct(s.profitMargin)}</div></div>
+    <div class="stat-cell"><div class="k-label">Revenue</div><div class="k-value" data-count="${s.revenue}" data-format="money">${money(0)}</div></div>
+    <div class="stat-cell"><div class="k-label">Gross Profit</div><div class="k-value" data-count="${s.grossProfit}" data-format="money">${money(0)}</div></div>
+    <div class="stat-cell"><div class="k-label">Total Expenses</div><div class="k-value" data-count="${s.totalExpenses}" data-format="money">${money(0)}</div></div>
+    <div class="stat-cell"><div class="k-label">Net Income</div><div class="k-value" data-count="${s.netIncome}" data-format="money" style="color:${s.netIncome>=0?'var(--brand-strong)':'var(--red)'}">${money(0)}</div></div>
+    <div class="stat-cell"><div class="k-label">Profit Margin</div><div class="k-value" data-count="${s.profitMargin}" data-format="pct">${pct(0)}</div></div>
   `;
+  animateCounters(strip);
 
   // trend chart
   const months = monthsWithData(c);
@@ -1157,8 +1248,9 @@ function renderHealthGauge(score){
     data:{ datasets:[{ data:[score, 100-score], backgroundColor:[color, "oklch(0.93 0.006 155)"], borderWidth:0, cutout:"78%" }]},
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{enabled:false}}, animation:{duration:600, easing:"easeOutQuart"} }
   });
-  document.getElementById("healthScoreNum").textContent = score;
-  document.getElementById("healthScoreNum").style.color = color;
+  const healthEl2 = document.getElementById("healthScoreNum");
+  healthEl2.style.color = color;
+  tweenNumber(healthEl2, score, "int", 0, 700);
   let label = score >= 80 ? "Strong performance" : score >= 60 ? "Fair — needs a few fixes" : "At risk — needs attention";
   document.getElementById("healthScoreLabel").textContent = label;
 }
@@ -1174,16 +1266,18 @@ function renderPerformance(){
   const prevMonth = months.length>1 ? c.monthly[months[months.length-2]] : null;
   const revDelta = prevMonth && prevMonth.income ? (s.revenue - prevMonth.income)/prevMonth.income : null;
   const opexPctOfRev = s.revenue ? s.totalExpenses/s.revenue : 0;
-  document.getElementById("perfSnapshotStrip").innerHTML = `
-    <div class="stat-cell"><div class="k-label">Revenue</div><div class="k-value">${money(s.revenue)}</div>
+  const perfStrip = document.getElementById("perfSnapshotStrip");
+  perfStrip.innerHTML = `
+    <div class="stat-cell"><div class="k-label">Revenue</div><div class="k-value" data-count="${s.revenue}" data-format="money">${money(0)}</div>
       ${revDelta!==null ? `<div class="k-delta ${revDelta>=0?'up':'down'}">${revDelta>=0?'+':''}${(revDelta*100).toFixed(1)}% vs prior month</div>` : ""}</div>
-    <div class="stat-cell"><div class="k-label">Gross Profit</div><div class="k-value">${money(s.grossProfit)}</div>
+    <div class="stat-cell"><div class="k-label">Gross Profit</div><div class="k-value" data-count="${s.grossProfit}" data-format="money">${money(0)}</div>
       <div class="k-delta" style="color:var(--text-muted);">${pct(s.revenue ? s.grossProfit/s.revenue : 0)} margin</div></div>
-    <div class="stat-cell"><div class="k-label">Operating Expenses</div><div class="k-value">${money(s.totalExpenses)}</div>
+    <div class="stat-cell"><div class="k-label">Operating Expenses</div><div class="k-value" data-count="${s.totalExpenses}" data-format="money">${money(0)}</div>
       <div class="k-delta" style="color:var(--text-muted);">${pct(opexPctOfRev)} of revenue</div></div>
-    <div class="stat-cell"><div class="k-label">Net Income</div><div class="k-value" style="color:${s.netIncome>=0?'var(--brand-strong)':'var(--red)'}">${money(s.netIncome)}</div>
+    <div class="stat-cell"><div class="k-label">Net Income</div><div class="k-value" data-count="${s.netIncome}" data-format="money" style="color:${s.netIncome>=0?'var(--brand-strong)':'var(--red)'}">${money(0)}</div>
       <div class="k-delta ${profitTarget && s.profitMargin<profitTarget?'down':'up'}">${pct(s.profitMargin)} margin${profitTarget?` · target ${pct(profitTarget)}`:""}</div></div>
   `;
+  animateCounters(perfStrip);
   renderChart("chartPerfTrend", "bar", {
     labels: months,
     datasets:[
@@ -1258,7 +1352,9 @@ function renderGaugeGrid(c){
       data:{ datasets:[{ data:[fillPct, 100-fillPct], backgroundColor:[color, "oklch(0.93 0.006 155)"], borderWidth:0, cutout:"76%" }]},
       options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{enabled:false}}, animation:{duration:500, easing:"easeOutQuart"} }
     });
-    document.getElementById("gaugeVal-"+i).innerHTML = `<span style="color:${color}">${pct(k.actualPct)}</span>`;
+    const valEl = document.getElementById("gaugeVal-"+i);
+    valEl.innerHTML = `<span style="color:${color}">${pct(0)}</span>`;
+    tweenNumber(valEl.firstElementChild, k.actualPct, "pct", i*80, 600);
   });
 }
 
@@ -1345,13 +1441,15 @@ function renderGoals(){
 function renderCashDebt(){
   const c = activeClient();
   const d = c.debt;
-  document.getElementById("debtStrip").innerHTML = `
-    <div class="stat-cell"><div class="k-label">Total Debt</div><div class="k-value">${money(d.totalDebt)}</div></div>
-    <div class="stat-cell"><div class="k-label">Monthly Debt Service</div><div class="k-value">${money(d.monthlyDebtService)}</div></div>
-    <div class="stat-cell"><div class="k-label">High-Interest Debt</div><div class="k-value">${money(d.highInterestDebt)}</div></div>
-    <div class="stat-cell"><div class="k-label">Weighted Avg APR</div><div class="k-value">${pct(d.weightedAPR)}</div></div>
+  const debtStrip = document.getElementById("debtStrip");
+  debtStrip.innerHTML = `
+    <div class="stat-cell"><div class="k-label">Total Debt</div><div class="k-value" data-count="${d.totalDebt}" data-format="money">${money(0)}</div></div>
+    <div class="stat-cell"><div class="k-label">Monthly Debt Service</div><div class="k-value" data-count="${d.monthlyDebtService}" data-format="money">${money(0)}</div></div>
+    <div class="stat-cell"><div class="k-label">High-Interest Debt</div><div class="k-value" data-count="${d.highInterestDebt}" data-format="money">${money(0)}</div></div>
+    <div class="stat-cell"><div class="k-label">Weighted Avg APR</div><div class="k-value" data-count="${d.weightedAPR}" data-format="pct">${pct(0)}</div></div>
     <div class="stat-cell"><div class="k-label">Debt Service % / Target</div><div class="k-value" style="font-size:19px;">${pct(d.debtServicePct)} <span style="font-size:13px; color:var(--text-faint);">/ ${pct(d.industryTarget)}</span></div></div>
   `;
+  animateCounters(debtStrip);
   renderDebtTable();
 }
 function renderDebtTable(){
@@ -1780,12 +1878,16 @@ function renderBenchmarks(){
 function renderChart(canvasId, type, data, extraOptions={}){
   const ctx = document.getElementById(canvasId);
   if(charts[canvasId]) charts[canvasId].destroy();
+  const reduced = prefersReducedMotion();
   charts[canvasId] = new Chart(ctx, {
     type, data,
     options: Object.assign({
       responsive:true, maintainAspectRatio:false,
       interaction:{mode:"index", intersect:false},
-      animation:{duration:500, easing:"easeOutQuart"},
+      animation: reduced ? false : {
+        duration:600, easing:"easeOutQuart",
+        delay: (ctx)=> ctx.type === "data" && ctx.mode === "default" ? ctx.dataIndex*35 + ctx.datasetIndex*110 : 0,
+      },
       plugins:{ legend:{ position:"bottom", labels:{boxWidth:10, boxHeight:10, usePointStyle:true, font:{size:11.5}, color:"#5b645f"} } },
       scales:{
         x:{ grid:{display:false}, ticks:{color:"#8a938d", font:{size:11.5}} },
