@@ -990,7 +990,160 @@ function seedAlkys(){
   };
 }
 
-let clients = [seedAlkys()];
+/* Fabricated demo clients — sample data only, for demonstrating the client
+   switcher across industries. Not real customer financials. */
+function seedBrightPath(){
+  return {
+    id: "bright-path-chiropractic",
+    name: "Bright Path Chiropractic",
+    industry: "Chiropractic",
+    entityType: "S-Corp",
+    reportingMonth: "Jun 2026",
+    preparedBy: "MBK Financial Services",
+    plan: "$600+ Monthly Advisory",
+    monthly: {
+      "Jan 2026": {income:42500, cogs:1275, grossProfit:41225, team:15087.5, marketing:3400, overhead:4462.5, operations:6800, totalExpenses:29750, netIncome:11475, gpMargin:0.9700, profitMargin:0.2700, teamPct:0.3550, marketingPct:0.0800, opsPct:0.1600},
+      "Feb 2026": {income:44100, cogs:1323, grossProfit:42777, team:15655.5, marketing:3528, overhead:4630.5, operations:7056, totalExpenses:30870, netIncome:11907, gpMargin:0.9700, profitMargin:0.2700, teamPct:0.3550, marketingPct:0.0800, opsPct:0.1600},
+      "Mar 2026": {income:39800, cogs:1194, grossProfit:38606, team:14129, marketing:3184, overhead:4179, operations:6368, totalExpenses:27860, netIncome:10746, gpMargin:0.9700, profitMargin:0.2700, teamPct:0.3550, marketingPct:0.0800, opsPct:0.1600},
+      "Apr 2026": {income:46200, cogs:1386, grossProfit:44814, team:16401, marketing:3696, overhead:4851, operations:7392, totalExpenses:32340, netIncome:12474, gpMargin:0.9700, profitMargin:0.2700, teamPct:0.3550, marketingPct:0.0800, opsPct:0.1600},
+      "May 2026": {income:49500, cogs:1485, grossProfit:48015, team:17572.5, marketing:3960, overhead:5197.5, operations:7920, totalExpenses:34650, netIncome:13365, gpMargin:0.9700, profitMargin:0.2700, teamPct:0.3550, marketingPct:0.0800, opsPct:0.1600},
+      "Jun 2026": {income:52300, cogs:1569, grossProfit:50731, team:18566.5, marketing:4184, overhead:5491.5, operations:8368, totalExpenses:36610, netIncome:14121, gpMargin:0.9700, profitMargin:0.2700, teamPct:0.3550, marketingPct:0.0800, opsPct:0.1600},
+      "Jul 2026": {income:50800, cogs:1524, grossProfit:49276, team:18034, marketing:4064, overhead:5334, operations:8128, totalExpenses:35560, netIncome:13716, gpMargin:0.9700, profitMargin:0.2700, teamPct:0.3550, marketingPct:0.0800, opsPct:0.1600},
+    },
+    snapshot: {revenue:52300, grossProfit:50731, totalExpenses:36610, netIncome:14121, profitMargin:0.2700, healthScore:88},
+    kpiScorecard: [
+      {category:"Products/COGS", actualDollar:1569, actualPct:0.0300, target:0.03, varianceDollar:0, status:"On Target", score:20, maxScore:20},
+      {category:"Team", actualDollar:18566.5, actualPct:0.3550, target:0.35, varianceDollar:296.5, status:"On Target", score:18, maxScore:20},
+      {category:"Marketing", actualDollar:4184, actualPct:0.0800, target:0.10, varianceDollar:-1046, status:"On Target", score:9, maxScore:10},
+      {category:"Operations", actualDollar:8368, actualPct:0.1600, target:0.175, varianceDollar:-1183.5, status:"On Target", score:20, maxScore:20},
+      {category:"Profit", actualDollar:14121, actualPct:0.2700, target:0.245, varianceDollar:1339, status:"On Target", score:20, maxScore:20},
+      {category:"Revenue Trend", actualDollar:52300, actualPct:0.0566, target:0, varianceDollar:2800, status:"On Target", score:10, maxScore:10},
+      {category:"Debt Service", actualDollar:2100, actualPct:0.0402, target:0.10, varianceDollar:-3130, status:"On Target", score:8, maxScore:10},
+    ],
+    topPriorities: [
+      {priority:1, area:"Marketing", stat:"8.0% marketing vs 10.0% target", focus:"Consider increasing marketing spend to accelerate new-patient acquisition given strong current margins."},
+      {priority:2, area:"Team", stat:"35.5% team cost vs 35.0% target", focus:"Essentially on target — monitor staffing capacity as patient volume grows."},
+      {priority:3, area:"Debt", stat:"Debt service at 4.0% of revenue vs 10.0% target", focus:"Healthy debt position with capacity available for strategic equipment investment if needed."},
+    ],
+    goalsBenchmarks: [
+      {kpi:"Products/COGS", actual:0.0300, target:0.03, status:"On Target", note:"Maintain current discipline."},
+      {kpi:"Team", actual:0.3550, target:0.35, status:"On Target", note:"Slightly above target — monitor as the practice grows."},
+      {kpi:"Marketing", actual:0.0800, target:0.10, status:"On Target", note:"Below target with room to invest in growth."},
+      {kpi:"Operations", actual:0.1600, target:0.175, status:"On Target", note:"Maintain current discipline."},
+      {kpi:"Profit Margin", actual:0.2700, target:0.245, status:"On Target", note:"Exceeding target — strong margin performance."},
+    ],
+    clientGoals: [
+      {type:"Revenue", current:"", goal:"", due:"", owner:""},
+      {type:"Profit", current:"", goal:"", due:"", owner:""},
+      {type:"Cash Reserve", current:"", goal:"", due:"", owner:""},
+      {type:"Debt Reduction", current:"", goal:"", due:"", owner:""},
+    ],
+    debt: {
+      totalDebt:60500, monthlyDebtService:2100, highInterestDebt:0, weightedAPR:0.0773, debtServicePct:0.0402, industryTarget:0.10, status:"Reviewed",
+      register: [
+        {name:"Equipment Loan - Adjustment Tables", lender:"Wells Fargo", type:"Equipment Loan", balance:18500, payment:650, apr:0.069},
+        {name:"Practice Buildout Loan", lender:"Live Oak Bank", type:"Term Loan", balance:42000, payment:1450, apr:0.081},
+      ],
+    },
+    expenseBreakdown: [
+      {label:"Clinical Staff Wages", amount:14200},
+      {label:"Front Desk Wages", amount:4366.5},
+      {label:"Marketing & Advertising", amount:4184},
+      {label:"Rent", amount:3800},
+      {label:"Utilities & Insurance", amount:1691.5},
+      {label:"Equipment Lease", amount:3200},
+      {label:"Software & EHR Fees", amount:2400},
+      {label:"Supplies & Misc", amount:2768},
+    ],
+    recommendations: [
+      {priority:"Medium", area:"Marketing", issue:"Marketing spend is below the effective industry target.", impact:"Underinvesting in marketing may slow new-patient growth relative to capacity.", focus:"Evaluate increasing marketing spend given strong current margins.", status:"Open"},
+      {priority:"Low", area:"Team", issue:"Team cost is marginally above the effective industry target.", impact:"Slight cost creep; not yet a concern but worth monitoring.", focus:"Track staffing costs against patient volume growth.", status:"Open"},
+      {priority:"Low", area:"Operations", issue:"Operating costs are comfortably below target.", impact:"Strong cost discipline supports healthy margins.", focus:"Maintain current operating discipline.", status:"Resolved"},
+      {priority:"Medium", area:"Debt", issue:"Debt service is well under target, with capacity for strategic investment.", impact:"Low leverage gives flexibility for equipment or expansion financing.", focus:"Evaluate whether additional financing could accelerate growth plans.", status:"Open"},
+      {priority:"Low", area:"Profit", issue:"Profit margin exceeds the effective industry target.", impact:"Strong retained earnings support reinvestment or owner distributions.", focus:"Discuss allocation of surplus profit — reinvest, reserve, or distribute.", status:"Open"},
+    ],
+    advisorNotes: [],
+  };
+}
+
+function seedIronclad(){
+  return {
+    id: "ironclad-roofing-construction",
+    name: "Ironclad Roofing & Construction",
+    industry: "Contractor / Trades",
+    entityType: "LLC",
+    reportingMonth: "Jun 2026",
+    preparedBy: "MBK Financial Services",
+    plan: "$600+ Monthly Advisory",
+    monthly: {
+      "Jan 2026": {income:68000, cogs:19720, grossProfit:48280, team:14960, marketing:2040, overhead:3400, operations:18360, totalExpenses:38760, netIncome:9520, gpMargin:0.7100, profitMargin:0.1400, teamPct:0.2200, marketingPct:0.0300, opsPct:0.2700},
+      "Feb 2026": {income:71500, cogs:20735, grossProfit:50765, team:15730, marketing:2145, overhead:3575, operations:19305, totalExpenses:40755, netIncome:10010, gpMargin:0.7100, profitMargin:0.1400, teamPct:0.2200, marketingPct:0.0300, opsPct:0.2700},
+      "Mar 2026": {income:89000, cogs:25810, grossProfit:63190, team:19580, marketing:2670, overhead:4450, operations:24030, totalExpenses:50730, netIncome:12460, gpMargin:0.7100, profitMargin:0.1400, teamPct:0.2200, marketingPct:0.0300, opsPct:0.2700},
+      "Apr 2026": {income:105000, cogs:30450, grossProfit:74550, team:23100, marketing:3150, overhead:5250, operations:28350, totalExpenses:59850, netIncome:14700, gpMargin:0.7100, profitMargin:0.1400, teamPct:0.2200, marketingPct:0.0300, opsPct:0.2700},
+      "May 2026": {income:118000, cogs:34220, grossProfit:83780, team:25960, marketing:3540, overhead:5900, operations:31860, totalExpenses:67260, netIncome:16520, gpMargin:0.7100, profitMargin:0.1400, teamPct:0.2200, marketingPct:0.0300, opsPct:0.2700},
+      "Jun 2026": {income:142000, cogs:41180, grossProfit:100820, team:31240, marketing:4260, overhead:7100, operations:38340, totalExpenses:80940, netIncome:19880, gpMargin:0.7100, profitMargin:0.1400, teamPct:0.2200, marketingPct:0.0300, opsPct:0.2700},
+      "Jul 2026": {income:138000, cogs:40020, grossProfit:97980, team:30360, marketing:4140, overhead:6900, operations:37260, totalExpenses:78660, netIncome:19320, gpMargin:0.7100, profitMargin:0.1400, teamPct:0.2200, marketingPct:0.0300, opsPct:0.2700},
+    },
+    snapshot: {revenue:142000, grossProfit:100820, totalExpenses:80940, netIncome:19880, profitMargin:0.1400, healthScore:74},
+    kpiScorecard: [
+      {category:"Products/COGS", actualDollar:41180, actualPct:0.2900, target:0.25, varianceDollar:5680, status:"Needs Attention", score:10, maxScore:20},
+      {category:"Team", actualDollar:31240, actualPct:0.2200, target:0.20, varianceDollar:2840, status:"Needs Attention", score:14, maxScore:20},
+      {category:"Marketing", actualDollar:4260, actualPct:0.0300, target:0.05, varianceDollar:-2840, status:"On Target", score:8, maxScore:10},
+      {category:"Operations", actualDollar:38340, actualPct:0.2700, target:0.30, varianceDollar:-4260, status:"On Target", score:20, maxScore:20},
+      {category:"Profit", actualDollar:19880, actualPct:0.1400, target:0.15, varianceDollar:-1420, status:"Needs Attention", score:15, maxScore:20},
+      {category:"Revenue Trend", actualDollar:142000, actualPct:0.2034, target:0, varianceDollar:24000, status:"On Target", score:10, maxScore:10},
+      {category:"Debt Service", actualDollar:3770, actualPct:0.0265, target:0.12, varianceDollar:-13270, status:"On Target", score:9, maxScore:10},
+    ],
+    topPriorities: [
+      {priority:1, area:"Products/COGS", stat:"29.0% COGS vs 25.0% target", focus:"Review job-costing on recent projects to identify material and subcontractor cost overruns."},
+      {priority:2, area:"Team", stat:"22.0% team cost vs 20.0% target", focus:"Evaluate crew scheduling efficiency against current project volume."},
+      {priority:3, area:"Debt", stat:"Line of credit carries a 15.5% rate", focus:"Prioritize paying down the high-interest line of credit before other debt."},
+    ],
+    goalsBenchmarks: [
+      {kpi:"Products/COGS", actual:0.2900, target:0.25, status:"Needs Attention", note:"Review the largest accounts driving this variance."},
+      {kpi:"Team", actual:0.2200, target:0.20, status:"Needs Attention", note:"Review the largest accounts driving this variance."},
+      {kpi:"Marketing", actual:0.0300, target:0.05, status:"On Target", note:"Maintain current discipline."},
+      {kpi:"Operations", actual:0.2700, target:0.30, status:"On Target", note:"Maintain current discipline."},
+      {kpi:"Profit Margin", actual:0.1400, target:0.15, status:"Needs Attention", note:"Close to target — monitor COGS and team costs closely."},
+    ],
+    clientGoals: [
+      {type:"Revenue", current:"", goal:"", due:"", owner:""},
+      {type:"Profit", current:"", goal:"", due:"", owner:""},
+      {type:"Cash Reserve", current:"", goal:"", due:"", owner:""},
+      {type:"Debt Reduction", current:"", goal:"", due:"", owner:""},
+    ],
+    debt: {
+      totalDebt:105000, monthlyDebtService:3770, highInterestDebt:15000, weightedAPR:0.0813, debtServicePct:0.0265, industryTarget:0.12, status:"Needs Attention",
+      register: [
+        {name:"Equipment Loan - Excavator", lender:"CAT Financial", type:"Equipment Loan", balance:52000, payment:1850, apr:0.072},
+        {name:"Fleet Vehicle Loans", lender:"Ford Credit", type:"Auto Loan", balance:38000, payment:1420, apr:0.065},
+        {name:"Line of Credit", lender:"Truist", type:"LOC", balance:15000, payment:500, apr:0.155},
+      ],
+    },
+    expenseBreakdown: [
+      {label:"Field Crew Wages", amount:24500},
+      {label:"Office & Admin Wages", amount:6740},
+      {label:"Advertising & Lead Gen", amount:4260},
+      {label:"Shop Rent", amount:5100},
+      {label:"Utilities & Insurance", amount:2000},
+      {label:"Vehicle & Equipment Fuel", amount:9800},
+      {label:"Equipment Maintenance", amount:8200},
+      {label:"Software & Permits", amount:4200},
+      {label:"Liability Insurance", amount:6140},
+      {label:"Misc Operating", amount:10000},
+    ],
+    recommendations: [
+      {priority:"High", area:"Operations", issue:"Material and subcontractor costs exceed the effective industry target.", impact:"Rising COGS is compressing gross margin on completed jobs.", focus:"Audit recent job costs against original bids to find the source of overruns.", status:"Open"},
+      {priority:"Medium", area:"Team", issue:"Crew labor cost is above the effective industry target.", impact:"Labor costs are growing faster than revenue on a percentage basis.", focus:"Review crew utilization and scheduling against current project pipeline.", status:"Open"},
+      {priority:"Medium", area:"Profit", issue:"Profit margin is just below the effective industry target.", impact:"Narrow margin leaves little cushion if material costs rise further.", focus:"Address COGS and labor overruns to restore target margin.", status:"Open"},
+      {priority:"Medium", area:"Debt", issue:"A revolving line of credit carries a high interest rate.", impact:"High-interest debt increases financing costs and reduces flexibility.", focus:"Prioritize paying down the high-rate line of credit ahead of the lower-rate equipment loans.", status:"Open"},
+      {priority:"Low", area:"Marketing", issue:"Marketing spend is below the effective industry target.", impact:"Low lead-generation spend may limit pipeline growth in slower seasons.", focus:"Consider modest marketing investment ahead of the winter slowdown.", status:"Open"},
+    ],
+    advisorNotes: [],
+  };
+}
+
+let clients = [seedAlkys(), seedBrightPath(), seedIronclad()];
 let activeClientId = clients[0].id;
 let currentView = "dashboard";
 let charts = {};
