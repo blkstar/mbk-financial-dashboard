@@ -1263,7 +1263,8 @@ function renderPerformance(){
   const months = monthsWithData(c);
   const s = c.snapshot;
   const profitTarget = (c.kpiScorecard.find(k=>k.category==="Profit")||{}).target;
-  const prevMonth = months.length>1 ? c.monthly[months[months.length-2]] : null;
+  const reportIdx = months.indexOf(c.reportingMonth);
+  const prevMonth = reportIdx > 0 ? c.monthly[months[reportIdx-1]] : null;
   const revDelta = prevMonth && prevMonth.income ? (s.revenue - prevMonth.income)/prevMonth.income : null;
   const opexPctOfRev = s.revenue ? s.totalExpenses/s.revenue : 0;
   const perfStrip = document.getElementById("perfSnapshotStrip");
