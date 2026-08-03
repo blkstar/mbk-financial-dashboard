@@ -227,12 +227,8 @@ button{font-family:inherit;}
 .rec-icon{
   width:34px; height:34px; border-radius:9px; flex:none;
   display:flex; align-items:center; justify-content:center;
+  background:var(--brand-soft); color:var(--brand-strong);
 }
-.rec-icon.i-profit{background:var(--brand-soft); color:var(--brand-strong);}
-.rec-icon.i-operations{background:oklch(0.94 0.01 240); color:oklch(0.45 0.08 240);}
-.rec-icon.i-team{background:var(--amber-soft); color:oklch(0.42 0.13 65);}
-.rec-icon.i-debt{background:var(--red-soft); color:var(--red);}
-.rec-icon.i-marketing{background:oklch(0.94 0.05 320); color:oklch(0.45 0.13 320);}
 .rec-source{
   font-size:10.5px; font-family:ui-monospace, "SF Mono", Menlo, monospace;
   color:var(--text-faint); margin-top:8px;
@@ -1667,20 +1663,18 @@ function removeDebtRow(i){
    RENDER: RECOMMENDATIONS
    ====================================================================== */
 function recIconSvg(area){
+  // Lucide icon set (via better-icons / Iconify), single-color line style
   const icons = {
-    Profit: '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
-    Operations: '<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82 2 2 0 11-2.83 2.83 1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33 2 2 0 11-2.83-2.83 1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82 2 2 0 112.83-2.83 1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33 2 2 0 112.83 2.83 1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.2"/>',
-    Team: '<circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M3 20c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="17" cy="9" r="2.3" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 14c2.5.3 4.5 2 4.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
-    "Debt / Team": '<circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M3 20c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
-    Debt: '<rect x="3" y="10" width="18" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 10l9-6 9 6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M7 13.5v4M12 13.5v4M17 13.5v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
-    Marketing: '<path d="M3 11v2a2 2 0 002 2h1l3.5 4V5L6 9H5a2 2 0 00-2 2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 8.5a4 4 0 010 7M17 5.5a8 8 0 010 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
-    Setup: '<path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+    Profit: '<g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 7h6v6"/><path d="m22 7l-8.5 8.5l-5-5L2 17"/></g>',
+    Operations: '<g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14 17H5M19 7h-9"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></g>',
+    Team: '<g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3.128a4 4 0 0 1 0 7.744M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></g>',
+    "Debt / Team": '<g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3.128a4 4 0 0 1 0 7.744M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></g>',
+    Debt: '<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 18v-7m1.119-8.795a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949zM14 18v-7m4 7v-7M3 22h18M6 18v-7"/>',
+    Marketing: '<g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M6 14a12 12 0 0 0 2.4 7.2a2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14M8 6v8"/></g>',
+    Setup: '<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m5-7l-5-5l-5 5m14 7v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>',
+    "Products/COGS": '<g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73zm1 .27V12"/><path d="M3.29 7L12 12l8.71-5M7.5 4.27l9 5.15"/></g>',
   };
   return icons[area] || '<circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/>';
-}
-function recIconClass(area){
-  const map = {Profit:"i-profit", Operations:"i-operations", Team:"i-team", Debt:"i-debt", "Debt / Team":"i-debt", Marketing:"i-marketing", Setup:"i-operations"};
-  return map[area] || "i-operations";
 }
 
 function renderRecommendations(){
@@ -1697,7 +1691,7 @@ function renderRecommendations(){
     const resolved = r.status === "Resolved";
     return `
     <div class="rec-item ${resolved?'resolved':''}">
-      <div class="rec-icon ${recIconClass(r.area)}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none">${recIconSvg(r.area)}</svg></div>
+      <div class="rec-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none">${recIconSvg(r.area)}</svg></div>
       <div class="rec-main">
         <div class="rec-top">${priorityPill(r.priority)}<span class="rec-area">${r.area}</span></div>
         <div class="rec-issue">${r.issue}</div>
