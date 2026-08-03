@@ -2044,7 +2044,7 @@ function renderChart(canvasId, type, data, extraOptions={}){
         duration:600, easing:"easeOutQuart",
         delay: (ctx)=> ctx.type === "data" && ctx.mode === "default" ? ctx.dataIndex*35 + ctx.datasetIndex*110 : 0,
       },
-      plugins:{ legend:{ position:"bottom", labels:{boxWidth:10, boxHeight:10, usePointStyle:true, font:{size:11.5}, color:"#5b645f"} } },
+      plugins:{ legend:{ position:"bottom", labels:{boxWidth:10, boxHeight:10, usePointStyle:true, font:{size:11.5}, color:"#5b645f", padding:30} } },
       scales:{
         x:{ grid:{display:false}, ticks:{color:"#8a938d", font:{size:11.5}} },
         y:{ grid:{color:"#eef0ee"}, ticks:{color:"#8a938d", font:{size:11.5}} },
