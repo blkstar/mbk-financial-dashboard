@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBK Advisory Dashboard — Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<style>
+:root{
+  --brand: oklch(0.53 0.125 154);
+  --brand-strong: oklch(0.44 0.125 154);
+  --brand-soft: oklch(0.94 0.045 154);
+  --brand-line: oklch(0.80 0.07 154);
+  --amber: oklch(0.68 0.15 70);
+  --amber-soft: oklch(0.95 0.05 75);
+  --ink: oklch(0.20 0.020 155);
+  --ink-2: oklch(0.30 0.026 155);
+  --paper: oklch(0.985 0.004 155);
+  --canvas: oklch(0.965 0.006 155);
+  --text: oklch(0.22 0.015 155);
+  --text-muted: oklch(0.50 0.014 155);
+  --border: oklch(0.90 0.008 155);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--text);
+  background:var(--canvas);
+  -webkit-font-smoothing:antialiased;
+  line-height:1.55;
+}
+h1,h2,h3{margin:0; font-weight:700; letter-spacing:-0.02em; text-wrap:balance;}
+p{margin:0;}
+img{max-width:100%;display:block;}
+a{color:inherit;}
+
+.page{max-width:880px;margin:0 auto;background:#fff;padding:88px 64px 0;border-left:1px solid var(--border);border-right:1px solid var(--border);}
+
+.kicker{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--brand-strong);background:var(--brand-soft);
+  padding:6px 14px;border-radius:100px;margin-bottom:22px;
+}
+.title{font-size:44px;line-height:1.08;margin-bottom:18px;color:var(--ink);}
+.dek{font-size:19px;color:var(--text-muted);max-width:640px;margin-bottom:44px;}
+
+.meta-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
+  padding:28px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  margin-bottom:72px;
+}
+.meta-item .ml{font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;}
+.meta-item .mv{font-size:14.5px;font-weight:600;color:var(--ink);}
+
+section{margin-bottom:76px;}
+.section-title{
+  font-size:12px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;
+  color:var(--brand-strong);margin-bottom:14px;
+}
+.section-head{font-size:27px;line-height:1.28;color:var(--ink);margin-bottom:20px;max-width:640px;}
+.body-text{font-size:15.5px;color:var(--text);max-width:640px;margin-bottom:16px;}
+.body-text:last-child{margin-bottom:0;}
+.body-text b{color:var(--ink);}
+.pull-quote{
+  font-size:22px;line-height:1.4;color:var(--ink);font-weight:600;
+  border-left:3px solid var(--brand);padding-left:22px;margin:26px 0;max-width:600px;
+}
+
+ul.principles{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:14px;}
+ul.principles li{
+  display:flex;gap:14px;font-size:15px;color:var(--text);
+  background:var(--canvas);border:1px solid var(--border);border-radius:12px;padding:16px 18px;
+}
+ul.principles li .num{
+  flex:none;width:24px;height:24px;border-radius:7px;background:var(--brand);color:#fff;
+  font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;
+}
+
+.palette-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:26px 0 32px;}
+.swatch{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#fff;}
+.swatch .chip{height:88px;}
+.swatch .label{padding:12px 14px;}
+.swatch .label .n{font-size:13px;font-weight:700;color:var(--ink);}
+.swatch .label .v{font-size:11.5px;color:var(--text-muted);font-family:ui-monospace,"SF Mono",Menlo,monospace;margin-top:2px;}
+
+.font-card{
+  border:1px solid var(--border);border-radius:14px;padding:28px;background:var(--canvas);margin-bottom:8px;
+}
+.font-card .fn{font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;}
+.font-card .fs{font-size:34px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:8px;}
+.font-card .fd{font-size:14px;color:var(--text-muted);}
+
+.timeline{display:flex;flex-direction:column;margin-top:28px;}
+.timeline-item{display:grid;grid-template-columns:36px 1fr;gap:18px;padding-bottom:28px;position:relative;}
+.timeline-item:last-child{padding-bottom:0;}
+.timeline-item::before{
+  content:"";position:absolute;left:17px;top:34px;bottom:0;width:1px;background:var(--border);
+}
+.timeline-item:last-child::before{display:none;}
+.t-num{
+  width:36px;height:36px;border-radius:10px;background:var(--ink);color:#fff;font-weight:700;font-size:14px;
+  display:flex;align-items:center;justify-content:center;flex:none;z-index:1;
+}
+.t-head{font-size:15.5px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+.t-body{font-size:14.5px;color:var(--text-muted);}
+
+.screen-row{display:grid;grid-template-columns:340px 1fr;gap:36px;align-items:center;margin-bottom:52px;}
+.screen-row:last-child{margin-bottom:0;}
+.screen-row.rev{grid-template-columns:1fr 340px;}
+.screen-row.rev .mock{order:2;}
+.screen-row.rev .screen-copy{order:1;}
+.mock{
+  border-radius:14px;overflow:hidden;border:1px solid var(--border);
+  box-shadow:0 12px 32px oklch(0.2 0.02 155 / 0.10), 0 2px 8px oklch(0.2 0.02 155 / 0.06);
+}
+.mock img{display:block;width:100%;}
+.screen-copy .s-label{font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--brand-strong);margin-bottom:8px;}
+.screen-copy .s-title{font-size:19px;font-weight:700;color:var(--ink);margin-bottom:10px;}
+.screen-copy .s-body{font-size:14.5px;color:var(--text-muted);}
+.design-note{
+  margin-top:14px;background:var(--brand-soft);border:1px solid var(--brand-line);border-radius:10px;
+  padding:12px 14px;font-size:13px;color:var(--brand-strong);
+}
+
+.outcome-box{
+  background:var(--ink);color:#fff;border-radius:18px;padding:40px 44px;
+}
+.outcome-box .o-label{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:oklch(0.75 0.04 154);margin-bottom:14px;}
+.outcome-box .o-body{font-size:16px;line-height:1.65;color:oklch(0.92 0.006 155);}
+.outcome-box .o-body b{color:#fff;}
+.outcome-box .o-body + .o-body{margin-top:14px;}
+
+.finale{
+  position:relative;margin:0 -64px;padding:96px 64px 104px;
+  background:linear-gradient(180deg, var(--ink) 0%, oklch(0.16 0.02 155) 100%);
+  overflow:hidden;text-align:center;
+}
+.finale-orb-field{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.finale-orb{position:absolute;border-radius:50%;filter:blur(2px);opacity:0.5;}
+.finale-kicker{font-size:12px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:oklch(0.78 0.06 154);margin-bottom:16px;position:relative;}
+.finale-title{font-size:32px;color:#fff;max-width:520px;margin:0 auto 36px;position:relative;line-height:1.3;}
+.finale-frame{
+  position:relative;width:560px;max-width:100%;margin:0 auto 36px;border-radius:14px;overflow:hidden;
+  border:1px solid oklch(0.35 0.02 155);box-shadow:0 32px 64px oklch(0 0 0 / 0.45);
+}
+.finale-frame .fbar{
+  height:34px;background:oklch(0.22 0.02 155);display:flex;align-items:center;gap:6px;padding:0 14px;
+}
+.finale-frame .fdot{width:9px;height:9px;border-radius:50%;background:oklch(0.4 0.02 155);}
+.finale-frame .furl{
+  margin-left:10px;font-size:11px;color:oklch(0.6 0.02 155);font-family:ui-monospace,"SF Mono",Menlo,monospace;
+}
+.finale-frame img{display:block;width:100%;}
+.finale-cta{
+  position:relative;display:inline-flex;align-items:center;gap:8px;
+  background:var(--brand);color:#fff;font-weight:700;font-size:14.5px;
+  padding:14px 28px;border-radius:100px;text-decoration:none;
+  transition:transform 0.2s ease, background 0.2s ease;
+}
+.finale-cta:hover{background:var(--brand-strong);transform:translateY(-1px);}
+
+.foot-space{height:96px;}
+
+@media (max-width: 720px){
+  .page{padding:56px 24px 0;}
+  .title{font-size:32px;}
+  .meta-row{grid-template-columns:repeat(2,1fr);}
+  .palette-grid{grid-template-columns:1fr;}
+  .screen-row, .screen-row.rev{grid-template-columns:1fr;}
+  .screen-row.rev .mock, .screen-row.rev .screen-copy{order:initial;}
+  .finale{margin:0 -24px;padding:64px 24px 80px;}
+  .finale-title{font-size:26px;}
+}
+@media (prefers-reduced-motion: reduce){
+  .finale-orb{animation:none !important;}
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="kicker">Portfolio case study</div>
+  <h1 class="title">MBK Advisory Dashboard</h1>
+  <p class="dek">A client-facing financial reporting tool built to replace a mismatched CRM subscription — turning a bookkeeper's spreadsheet into an advisor-grade report, one industry-benchmarked client at a time.</p>
+
+  <div class="meta-row">
+    <div class="meta-item"><div class="ml">Role</div><div class="mv">Product Designer &amp; Developer (solo)</div></div>
+    <div class="meta-item"><div class="ml">Timeline</div><div class="mv">July – August 2026</div></div>
+    <div class="meta-item"><div class="ml">Tools</div><div class="mv">HTML/CSS/JS, Chart.js, SheetJS, Figma, Claude</div></div>
+    <div class="meta-item"><div class="ml">Type</div><div class="mv">Client project — MBK Financial Services</div></div>
+  </div>
+
+  <section>
+    <div class="section-title">The Ask</div>
+    <h2 class="section-head">"I really need a client-facing dashboard with custom reports."</h2>
+    <p class="body-text">MBK Financial Services is a bookkeeping and advisory practice that reports on client financials every month — revenue, margin, debt, and progress against goals. To get anything presentable in front of a client, MBK was paying for <b>Go High Level</b>, a general-purpose CRM and marketing platform, purely for its reporting surface. Even with the subscription, it could barely produce what was actually needed.</p>
+    <p class="body-text">That line, pulled directly from a client interview, became the brief: build the narrow thing MBK actually needed, instead of renting the wrong platform to approximate it.</p>
+  </section>
+
+  <section>
+    <div class="section-title">Research</div>
+    <h2 class="section-head">Starting from the spreadsheet, not the screen</h2>
+    <p class="body-text">Before sketching any UI, I asked to see how MBK actually works. That turned up an Excel workbook — the <b>MBK Business Performance System</b> — that already encoded months of a real client's income, cost of goods, expenses, and debt, plus a set of industry benchmark targets built by hand across eight business types: liquor stores, contractors, medical practices, chiropractors, law firms, and more.</p>
+    <p class="body-text">Rather than design a generic dashboard and hope the data would fit, I mined real numbers from one of MBK's actual clients — a liquor store doing roughly $147K in trailing revenue — so every chart, KPI card, and score would hold up against messy, general-ledger-level numbers instead of placeholder data.</p>
+    <div class="mock" style="margin-top:28px;">
+      <img src="assets/client-intake.jpg" alt="Client Intake screen showing workbook upload and existing client list">
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">The Problem</div>
+    <h2 class="section-head">A narrow need, wrapped in the wrong tool</h2>
+    <p class="body-text">MBK's actual workflow splits into two jobs a CRM was never built for: an <b>internal working view</b> to review a client's numbers against targets before an advisory call, and a <b>clean handoff document</b> that lands in that client's inbox looking like it came from a firm, not a spreadsheet.</p>
+    <p class="body-text">Layered on top of that: MBK reports on multiple clients at once, across different industries — and a "healthy" number for one business is a warning sign for another. A liquor store's target cost-of-goods percentage looks nothing like a chiropractic practice's. Go High Level had no concept of any of this; every report had to be forced into a marketing-funnel shaped tool.</p>
+  </section>
+
+  <section>
+    <div class="section-title">The Solution</div>
+    <h2 class="section-head">One file, zero subscriptions, built around the actual workflow</h2>
+    <p class="body-text">The result is a single, self-contained dashboard: drop in a client's Excel export and it builds a full client record automatically — a KPI scorecard weighted against that client's specific industry benchmark, a performance-trend view, a goals-and-benchmarks coaching page, a cash-and-debt register, and a prioritized recommendations feed. A client switcher lets MBK hold multiple businesses in one tool, and a dedicated print stylesheet turns the same data into a client-ready PDF with no extra design work. It's hosted for free on GitHub Pages — no subscription, no backend, no per-seat cost.</p>
+    <ul class="principles">
+      <li><div class="num">1</div><div><b>No new subscriptions.</b> One static HTML file, hosted for free — which is the entire reason this project exists.</div></li>
+      <li><div class="num">2</div><div><b>Benchmarked, not generic.</b> Every KPI is scored against the specific target for that client's industry, out of eight built-in profiles.</div></li>
+      <li><div class="num">3</div><div><b>One data model, two audiences.</b> The same client record powers MBK's internal review and the printable report handed to the client.</div></li>
+      <li><div class="num">4</div><div><b>Real numbers from day one.</b> Built and tuned against an actual client's general ledger, not sample data.</div></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="section-title">Design Direction</div>
+    <h2 class="section-head">Advisory Green — a restrained system for a firm that lives in numbers</h2>
+    <p class="body-text">The palette pulls directly from MBK's own brand green rather than introducing a new one, kept deliberately quiet: a dark, near-black sidebar for navigation, a bright paper canvas for report content, and a single accent color reserved almost entirely for status. No gradients, no glow, no glassmorphism — the goal was a report a client trusts at a glance, not a product demo.</p>
+    <div class="palette-grid">
+      <div class="swatch">
+        <div class="chip" style="background:oklch(0.53 0.125 154);"></div>
+        <div class="label"><div class="n">Advisory Green</div><div class="v">oklch(0.53 0.125 154)</div></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:oklch(0.20 0.020 155);"></div>
+        <div class="label"><div class="n">Ink</div><div class="v">oklch(0.20 0.020 155)</div></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:oklch(0.68 0.15 70);"></div>
+        <div class="label"><div class="n">Attention Amber</div><div class="v">oklch(0.68 0.15 70)</div></div>
+      </div>
+    </div>
+    <div class="font-card">
+      <div class="fn">Typeface</div>
+      <div class="fs">Inter</div>
+      <div class="fd">One typeface across the entire system — UI chrome, report copy, and tabular financial figures — so nothing reads as decorative in front of a client.</div>
+    </div>
+    <p class="body-text">Status is held to a strict three-value system — on target, needs attention, not yet scored — so a client scanning their own report knows instantly what to ask about, without reading a paragraph of analysis first.</p>
+  </section>
+
+  <section>
+    <div class="section-title">Process</div>
+    <h2 class="section-head">How this came together</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="t-num">1</div>
+        <div><div class="t-head">Mine the workbook</div><div class="t-body">Pulled real client data out of MBK's existing Excel template to ground the whole build in numbers that actually reconcile, instead of designing against placeholders.</div></div>
+      </div>
+      <div class="timeline-item">
+        <div class="t-num">2</div>
+        <div><div class="t-head">Build the core dashboard</div><div class="t-body">KPI scorecard, revenue/expense/profit chart, and a benchmarked health score for a single client view.</div></div>
+      </div>
+      <div class="timeline-item">
+        <div class="t-num">3</div>
+        <div><div class="t-head">Add the advisory layer</div><div class="t-body">Performance trends, a Goals &amp; Benchmarks coaching view, and an insight-styled Recommendations feed that turns variances into a prioritized to-do list.</div></div>
+      </div>
+      <div class="timeline-item">
+        <div class="t-num">4</div>
+        <div><div class="t-head">Make it multi-client</div><div class="t-body">Client Intake with drag-and-drop workbook parsing, a client switcher, and two demo clients to stress-test the pattern beyond a single business.</div></div>
+      </div>
+      <div class="timeline-item">
+        <div class="t-num">5</div>
+        <div><div class="t-head">Build the handoff</div><div class="t-body">A dedicated print stylesheet so the same dashboard renders as a clean, client-ready PDF with no separate deliverable to maintain.</div></div>
+      </div>
+      <div class="timeline-item">
+        <div class="t-num">6</div>
+        <div><div class="t-head">Polish and hand off</div><div class="t-body">Icon and spacing pass, full Figma export of every view for MBK's own reference, then a documented PRD and README pushed to GitHub.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">Walking Through the Screens</div>
+    <h2 class="section-head">From raw workbook to advisor-ready report</h2>
+
+    <div class="screen-row">
+      <div class="mock"><img src="assets/dashboard-switcher.jpg" alt="Dashboard view with client switcher open"></div>
+      <div class="screen-copy">
+        <div class="s-label">Dashboard</div>
+        <div class="s-title">The first thing an advisor opens</div>
+        <div class="s-body">Revenue, expenses, and profit at a glance, a benchmarked health score out of 100, and a KPI scorecard weighted by category. "Top Priorities" surfaces the three things worth leading with in the next advisory call. The client switcher, shown open here, lets MBK move between every business she reports on without leaving the page.</div>
+      </div>
+    </div>
+
+    <div class="screen-row rev">
+      <div class="mock"><img src="assets/performance.jpg" alt="Performance view with trend chart, KPI gauges and expense mix donut"></div>
+      <div class="screen-copy">
+        <div class="s-label">Performance</div>
+        <div class="s-title">Trends, not just a snapshot</div>
+        <div class="s-body">Trailing-period trends, circular KPI gauges measured against target, and an expense-mix breakdown pulled straight from the general ledger categories — so a client can see not just where they stand, but where they've been heading.</div>
+      </div>
+    </div>
+
+    <div class="screen-row">
+      <div class="mock"><img src="assets/goals-benchmarks.jpg" alt="Goals and Benchmarks view with actual vs target chart and coaching guidance"></div>
+      <div class="screen-copy">
+        <div class="s-label">Goals &amp; Benchmarks</div>
+        <div class="s-title">Where the coaching happens</div>
+        <div class="s-body">An actual-vs-target chart paired with plain-language "Coaching Guidance" for every KPI. This is the page MBK uses to walk a client through why a number matters, not just that it's off target.</div>
+      </div>
+    </div>
+
+    <div class="screen-row rev">
+      <div class="mock"><img src="assets/cash-debt.jpg" alt="Cash and Debt view with debt register table"></div>
+      <div class="screen-copy">
+        <div class="s-label">Cash &amp; Debt</div>
+        <div class="s-title">Debt, on the same page as everything else</div>
+        <div class="s-body">A full debt register — lender, balance, payment, and rate — with debt service measured as a percentage of revenue against target, so cash conversations never get separated from the P&amp;L conversation.</div>
+      </div>
+    </div>
+
+    <div class="screen-row">
+      <div class="mock"><img src="assets/recommendations.jpg" alt="Recommendations view with prioritized advisory insights"></div>
+      <div class="screen-copy">
+        <div class="s-label">Recommendations</div>
+        <div class="s-title">Variances, turned into a to-do list</div>
+        <div class="s-body">Every out-of-target KPI becomes a prioritized, plain-English recommendation with business impact and a resolvable focus item — styled like an insight feed rather than a spreadsheet full of red numbers.</div>
+        <div class="design-note">Design note: the first pass used a different color and icon per category. MBK's own feedback was that it read as busier than it needed to — a single restrained icon set replaced it, so the page reads as one system instead of five.</div>
+      </div>
+    </div>
+
+    <div class="screen-row rev">
+      <div class="mock"><img src="assets/client-intake.jpg" alt="Client Intake view with workbook upload and client list"></div>
+      <div class="screen-copy">
+        <div class="s-label">Client Intake</div>
+        <div class="s-title">Where a new client enters the system</div>
+        <div class="s-body">Drop a client's workbook in and a new client card is created automatically, parsed straight from MBK's existing Excel template — no manual re-entry, and nothing overwritten if the client already exists on file.</div>
+      </div>
+    </div>
+
+  </section>
+
+  <section>
+    <div class="section-title">Outcome</div>
+    <div class="outcome-box">
+      <div class="o-label">Where it stands</div>
+      <p class="o-body">The dashboard is live on GitHub Pages, currently running a real client's data alongside two demo clients used to validate the multi-industry benchmark model. It's documented with a PRD and README in the project repo, and every view has been exported to Figma for MBK's own reference and future handoff.</p>
+      <p class="o-body">Next up: a persistent client store — client records currently live in-session and are rebuilt from the workbook on each upload — and expanding the industry benchmark set beyond the initial eight profiles as MBK brings on clients outside those categories.</p>
+    </div>
+  </section>
+
+</div>
+
+<div class="finale">
+  <div class="finale-orb-field" id="orbField"></div>
+  <div class="finale-kicker">See it in action</div>
+  <h2 class="finale-title">A dashboard built for one advisory practice, one client at a time.</h2>
+  <div class="finale-frame">
+    <div class="fbar"><div class="fdot"></div><div class="fdot"></div><div class="fdot"></div><div class="furl">blkstar.github.io/mbk-financial-dashboard</div></div>
+    <img src="assets/dashboard-switcher.jpg" alt="MBK Advisory Dashboard live preview">
+  </div>
+  <a class="finale-cta" href="https://blkstar.github.io/mbk-financial-dashboard/MBK_Financial_Dashboard.html" target="_blank" rel="noopener">Open the live dashboard →</a>
+</div>
+
+<div class="foot-space"></div>
+
+<script>
+(function(){
+  var field = document.getElementById('orbField');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var colors = ['oklch(0.53 0.125 154 / 0.35)','oklch(0.68 0.15 70 / 0.25)','oklch(0.44 0.125 154 / 0.3)'];
+  var sizes = [220, 160, 190];
+  var positions = [
+    {top:'-8%', left:'8%'},
+    {top:'55%', left:'82%'},
+    {top:'70%', left:'6%'}
+  ];
+  for (var i = 0; i < 3; i++){
+    var orb = document.createElement('div');
+    orb.className = 'finale-orb';
+    orb.style.width = sizes[i] + 'px';
+    orb.style.height = sizes[i] + 'px';
+    orb.style.background = colors[i];
+    orb.style.top = positions[i].top;
+    orb.style.left = positions[i].left;
+    field.appendChild(orb);
+    if (!reduce && window.anime){
+      anime({
+        targets: orb,
+        translateX: [0, (i % 2 === 0 ? 40 : -40)],
+        translateY: [0, (i % 2 === 0 ? -30 : 30)],
+        scale: [1, 1.12],
+        easing: 'easeInOutSine',
+        duration: 5200 + i * 900,
+        direction: 'alternate',
+        loop: true
+      });
+    }
+  }
+})();
+</script>
+
+</body>
+</html>
