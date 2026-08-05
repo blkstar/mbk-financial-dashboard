@@ -207,7 +207,13 @@ ul.principles li .num{
   <section>
     <div class="section-title">Research</div>
     <h2 class="section-head">Starting from the spreadsheet, not the screen</h2>
-    <p class="body-text">Before sketching any UI, I asked to see how MBK actually works. That turned up an Excel workbook — the <b>MBK Business Performance System</b> — that already encoded months of a real client's income, cost of goods, expenses, and debt, plus a set of industry benchmark targets built by hand across eight business types: liquor stores, contractors, medical practices, chiropractors, law firms, and more.</p>
+    <p class="body-text">Before sketching any UI, I looked at what a generic version of this problem already looks like. The reference below is a stock BI-style template — stat cards, a donut chart, a bar chart, a leaderboard table — the kind of dashboard built for an internal ops team that lives on the screen all day.</p>
+    <div class="mock" style="margin-top:20px;">
+      <img src="assets/ubiq-sample-reference.webp" alt="Generic multi-widget sample dashboard template from Ubiq.co, reviewed as an early reference">
+    </div>
+    <p class="footnote">Reference: generic sample dashboard template, Ubiq.co — reviewed before any MBK-specific design work began.</p>
+    <p class="body-text" style="margin-top:24px;">It ruled out the direction fast. MBK's client doesn't live in this dashboard — she opens it once a month, hands a version of it to a customer, and moves on. That reframed the brief from "build a BI tool" to "build a report," which is a different design problem: fewer widgets, more hierarchy, and language a client understands without a legend.</p>
+    <p class="body-text">From there I asked to see how MBK actually works. That turned up an Excel workbook — the <b>MBK Business Performance System</b> — that already encoded months of a real client's income, cost of goods, expenses, and debt, plus a set of industry benchmark targets built by hand across eight business types: liquor stores, contractors, medical practices, chiropractors, law firms, and more.</p>
     <p class="body-text">Rather than design a generic dashboard and hope the data would fit, I mined real numbers from one of MBK's actual clients — a liquor store doing roughly $147K in trailing revenue — so every chart, KPI card, and score would hold up against messy, general-ledger-level numbers instead of placeholder data.</p>
     <div class="mock" style="margin-top:28px;">
       <img src="assets/client-intake.jpg" alt="Client Intake screen showing workbook upload and existing client list">
