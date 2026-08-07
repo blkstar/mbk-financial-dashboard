@@ -468,6 +468,83 @@ table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
 
 .benchmark-highlight td{background:var(--brand-soft) !important;}
 
+/* ---------- Login screen ---------- */
+#loginScreen{
+  position:fixed; inset:0; z-index:100;
+  background:linear-gradient(160deg, var(--ink) 0%, oklch(0.16 0.02 155) 100%);
+  display:flex; align-items:center; justify-content:center;
+  padding:24px;
+}
+.login-card{width:100%; max-width:420px; background:var(--panel); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); overflow:hidden;}
+.login-card-head{background:var(--ink); padding:30px 32px 22px; text-align:center;}
+.login-logo{height:38px; margin:0 auto 10px; display:block;}
+.login-tag{font-size:11px; color:oklch(0.65 0.02 155); text-transform:uppercase; letter-spacing:0.06em;}
+.login-card-body{padding:28px 32px 30px;}
+.login-mode-toggle{display:flex; background:var(--gray-soft); border-radius:10px; padding:3px; margin-bottom:22px;}
+.login-mode-btn{flex:1; padding:8px 10px; border-radius:8px; border:none; background:transparent; font-size:12.5px; font-weight:600; color:var(--text-muted); cursor:pointer; transition:background .15s var(--ease), color .15s var(--ease); font-family:inherit;}
+.login-mode-btn.active{background:var(--panel); color:var(--ink); box-shadow:var(--shadow-sm);}
+.login-panel{display:none;}
+.login-panel.active{display:block;}
+.login-field{margin-bottom:14px;}
+.login-field label{display:block; font-size:11.5px; font-weight:600; color:var(--text-muted); margin-bottom:5px;}
+.login-field input{width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:13.5px; font-family:inherit; background:var(--panel); color:var(--text);}
+.login-field input:focus{outline:none; border-color:var(--brand-line); box-shadow:0 0 0 3px var(--brand-soft);}
+.login-submit{width:100%; justify-content:center; margin-top:6px;}
+.login-client-list{display:flex; flex-direction:column; gap:8px;}
+.login-client-tile{
+  display:flex; align-items:center; gap:12px; padding:12px 14px; width:100%;
+  border:1px solid var(--border); border-radius:10px; cursor:pointer; text-align:left; background:var(--panel);
+  transition:border-color .15s var(--ease), background .15s var(--ease); font-family:inherit;
+}
+.login-client-tile:hover{border-color:var(--brand-line); background:var(--brand-soft);}
+.login-client-tile .ca{width:34px;height:34px;border-radius:9px;background:var(--brand-soft);color:var(--brand-strong);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;}
+.login-client-tile .cn{font-size:13.5px; font-weight:600; color:var(--ink);}
+.login-client-tile .ci{font-size:11.5px; color:var(--text-faint);}
+.login-note{font-size:11px; color:var(--text-faint); margin-top:20px; line-height:1.5;}
+
+/* ---------- Alerts ---------- */
+.alerts-wrap{position:relative;}
+.alerts-btn{position:relative;}
+.alerts-dot{position:absolute; top:6px; right:6px; width:8px; height:8px; border-radius:50%; background:var(--red); border:2px solid var(--panel);}
+.alerts-panel{
+  position:fixed; z-index:41; width:320px;
+  background:var(--panel); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:1px solid var(--border);
+  padding:8px; opacity:0; transform:translateY(-6px) scale(0.98); pointer-events:none;
+  transition:opacity 0.16s var(--ease), transform 0.16s var(--ease);
+}
+.alerts-panel.open{opacity:1; transform:translateY(0) scale(1); pointer-events:auto;}
+.alerts-head{display:flex; align-items:center; justify-content:space-between; padding:8px 10px 6px;}
+.alerts-head .ah-title{font-size:12.5px; font-weight:700; color:var(--ink);}
+.alerts-head .ah-action{font-size:11px; font-weight:600; color:var(--brand-strong); cursor:pointer;}
+.alert-item{display:flex; gap:10px; padding:10px; border-radius:8px;}
+.alert-item:hover{background:var(--gray-soft);}
+.alert-item.unread{background:var(--brand-soft);}
+.alert-icon{width:30px;height:30px;border-radius:8px;background:var(--panel);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--brand-strong);flex:none;}
+.alert-item.unread .alert-icon{background:var(--brand); color:white; border-color:transparent;}
+.alert-body .at-title{font-size:12.5px; font-weight:600; color:var(--ink);}
+.alert-body .at-sub{font-size:11.5px; color:var(--text-muted); margin-top:1px;}
+.alert-body .at-time{font-size:10.5px; color:var(--text-faint); margin-top:3px;}
+
+/* ---------- Sidebar user row ---------- */
+.sidebar-user{
+  display:flex; align-items:center; gap:10px; padding:10px 12px; margin:0 10px 12px;
+  border-radius:10px; background:var(--ink-2); border:1px solid var(--ink-line);
+}
+.sidebar-user .su-avatar{width:30px;height:30px;border-radius:8px;background:var(--brand); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12.5px; flex:none;}
+.sidebar-user .su-meta{flex:1; min-width:0;}
+.sidebar-user .su-name{font-size:12.5px; font-weight:600; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.sidebar-user .su-role{font-size:10.5px; color:oklch(0.62 0.02 155);}
+.sidebar-user .su-icons{display:flex; gap:2px; flex:none;}
+.sidebar-icon-btn{
+  width:26px; height:26px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+  color:oklch(0.7 0.02 155); background:transparent; border:none; cursor:pointer;
+  transition:background .15s var(--ease), color .15s var(--ease);
+}
+.sidebar-icon-btn:hover{background:var(--ink-3); color:white;}
+.client-btn.disabled{cursor:default;}
+.client-btn.disabled:hover{background:var(--ink-2);}
+.client-btn.disabled .chev{display:none;}
+
 @media (max-width:860px){
   .sidebar{position:fixed; left:0; top:0; transform:translateX(-100%); z-index:60; box-shadow:var(--shadow-lg); transition:transform 0.22s var(--ease);}
   .sidebar.open{transform:translateX(0);}
@@ -488,8 +565,8 @@ table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
   *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
   body{ background:white; font-size:11.5px; }
   .sidebar, .sidebar-backdrop, .menu-toggle, .topbar-actions,
-  .popover-backdrop, .client-popover, #toast-host,
-  .toggle-btn, .dropzone, .nav-badge{ display:none !important; }
+  .popover-backdrop, .client-popover, #toast-host, #loginScreen,
+  .alerts-panel, .toggle-btn, .dropzone, .nav-badge{ display:none !important; }
   .topbar{ position:static; padding:0 0 10px; backdrop-filter:none; background:transparent; border-bottom:2px solid var(--ink); }
   .view{ padding:0; max-width:none; }
   .print-header{
@@ -520,7 +597,38 @@ table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
 </head>
 <body>
 
-<div id="app">
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-card-head">
+      <img class="login-logo" alt="MBK Financial Services" src="mbk-logo.png">
+      <div class="login-tag">Advisory Reporting</div>
+    </div>
+    <div class="login-card-body">
+      <div class="login-mode-toggle">
+        <button class="login-mode-btn active" id="modeAdvisorBtn" onclick="setLoginMode('advisor')">Advisor</button>
+        <button class="login-mode-btn" id="modeClientBtn" onclick="setLoginMode('client')">Client</button>
+      </div>
+
+      <div class="login-panel active" id="panelAdvisor">
+        <div class="login-field"><label>Email</label><input type="email" value="admin@mbkfinancial.com"></div>
+        <div class="login-field"><label>Password</label><input type="password" value="••••••••"></div>
+        <button class="btn btn-primary login-submit" onclick="loginAsAdmin()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sign in as advisor
+        </button>
+      </div>
+
+      <div class="login-panel" id="panelClient">
+        <div class="login-field"><label>Select your business</label></div>
+        <div class="login-client-list" id="loginClientList"></div>
+      </div>
+
+      <div class="login-note">Demo build — pick any role above to preview the dashboard. No real credentials required.</div>
+    </div>
+  </div>
+</div>
+
+<div id="app" hidden>
   <aside class="sidebar" id="sidebar">
     <div class="brand-row">
       <img class="brand-logo" alt="MBK Financial Services" src="mbk-logo.png">
@@ -579,7 +687,7 @@ table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
           <span class="nav-badge" id="navBadgeNotes">0</span>
         </div>
       </div>
-      <div class="nav-group">
+      <div class="nav-group" id="manageNavGroup">
         <div class="nav-label">Manage</div>
         <div class="nav-item" data-view="intake">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -593,6 +701,21 @@ table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
     </nav>
 
     <div class="sidebar-foot">
+      <div class="sidebar-user">
+        <div class="su-avatar" id="sessionAvatar">MB</div>
+        <div class="su-meta">
+          <div class="su-name" id="sessionName">MBK Advisor</div>
+          <div class="su-role" id="sessionRole">Full access</div>
+        </div>
+        <div class="su-icons">
+          <button class="sidebar-icon-btn" onclick="toast('Settings coming soon')" aria-label="Settings">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="sidebar-icon-btn" onclick="logout()" aria-label="Log out">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
       <div class="plan-badge"><span class="dot"></span><span id="planBadge">$600+ Monthly Advisory</span></div>
       <div id="footPrepared">Prepared by MBK Financial Services</div>
       <div id="footMonth">Reporting month: Jun 2026</div>
@@ -623,11 +746,17 @@ table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
         </div>
       </div>
       <div class="topbar-actions">
+        <div class="alerts-wrap">
+          <button class="btn btn-ghost alerts-btn" id="alertsBtn" aria-label="Alerts">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span class="alerts-dot" id="alertsDot"></span>
+          </button>
+        </div>
         <button class="btn btn-ghost" onclick="window.print()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-2M6 14h12v7H6v-7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
           Print
         </button>
-        <button class="btn btn-primary" onclick="go('intake')">
+        <button class="btn btn-primary" id="addClientBtn" onclick="go('intake')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           Add Client
         </button>
@@ -884,6 +1013,12 @@ table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
     </section>
 
   </div>
+</div>
+
+<div class="popover-backdrop" id="alertsBackdrop"></div>
+<div class="alerts-panel" id="alertsPanel">
+  <div class="alerts-head"><div class="ah-title">Alerts</div><div class="ah-action" onclick="markAllAlertsRead()">Mark all read</div></div>
+  <div id="alertsList"></div>
 </div>
 
 <div class="popover-backdrop" id="popoverBackdrop"></div>
@@ -2082,9 +2217,133 @@ fileInput.addEventListener("change", (e)=>{ if(e.target.files[0]) handleWorkbook
 dropzone.addEventListener("drop", (e)=>{ const f = e.dataTransfer.files[0]; if(f) handleWorkbookFile(f); });
 
 /* ======================================================================
+   AUTH / ROLE
+   ====================================================================== */
+let role = null; // 'admin' | 'client'
+const CLIENT_ONLY_HIDDEN_VIEWS = ["recommendations", "notes", "intake", "benchmarks"];
+
+function renderLoginClientList(){
+  const wrap = document.getElementById("loginClientList");
+  wrap.innerHTML = clients.map(c => `
+    <button class="login-client-tile" onclick="loginAsClient('${c.id}')">
+      <div class="ca">${initials(c.name)}</div>
+      <div>
+        <div class="cn">${c.name}</div>
+        <div class="ci">${c.industry}</div>
+      </div>
+    </button>
+  `).join("");
+}
+
+function setLoginMode(mode){
+  document.getElementById("modeAdvisorBtn").classList.toggle("active", mode === "advisor");
+  document.getElementById("modeClientBtn").classList.toggle("active", mode === "client");
+  document.getElementById("panelAdvisor").classList.toggle("active", mode === "advisor");
+  document.getElementById("panelClient").classList.toggle("active", mode === "client");
+}
+
+function loginAsAdmin(){
+  role = "admin";
+  showApp();
+}
+function loginAsClient(id){
+  role = "client";
+  activeClientId = id;
+  showApp();
+}
+function logout(){
+  role = null;
+  document.getElementById("app").hidden = true;
+  document.getElementById("loginScreen").hidden = false;
+  closeSidebar();
+  closePopover();
+  closeAlerts();
+  setLoginMode("advisor");
+}
+
+function applyRoleVisibility(){
+  const isClient = role === "client";
+  document.querySelectorAll(".nav-item").forEach(n => {
+    n.style.display = (isClient && CLIENT_ONLY_HIDDEN_VIEWS.includes(n.dataset.view)) ? "none" : "";
+  });
+  document.getElementById("manageNavGroup").style.display = isClient ? "none" : "";
+  document.getElementById("addClientBtn").style.display = isClient ? "none" : "";
+
+  const csBtn = document.getElementById("clientSwitchBtn");
+  csBtn.classList.toggle("disabled", isClient);
+  csBtn.disabled = isClient;
+
+  const c = activeClient();
+  if(isClient){
+    document.getElementById("sessionAvatar").textContent = initials(c.name);
+    document.getElementById("sessionName").textContent = c.name;
+    document.getElementById("sessionRole").textContent = "Client access";
+  } else {
+    document.getElementById("sessionAvatar").textContent = "MB";
+    document.getElementById("sessionName").textContent = "MBK Advisor";
+    document.getElementById("sessionRole").textContent = "Full access";
+  }
+  if(isClient && CLIENT_ONLY_HIDDEN_VIEWS.includes(currentView)) go("dashboard");
+}
+
+function showApp(){
+  document.getElementById("loginScreen").hidden = true;
+  document.getElementById("app").hidden = false;
+  applyRoleVisibility();
+  go("dashboard");
+}
+
+/* ======================================================================
+   ALERTS
+   ====================================================================== */
+const ALERTS = [
+  {icon:"report", title:"Q1 2026 report available", sub:"Reporting period closed and ready to review.", time:"2h ago", unread:true},
+  {icon:"upload", title:"Workbook imported", sub:"Jun 2026 monthly data was added to the dashboard.", time:"1d ago", unread:true},
+  {icon:"flag", title:"New recommendation flagged", sub:"Profit margin fell below the industry target.", time:"3d ago", unread:false},
+];
+const ALERT_ICONS = {
+  report:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 4h14v13l-4 4H5V4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 9h6M9 13h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  upload:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  flag:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+};
+function renderAlerts(){
+  document.getElementById("alertsList").innerHTML = ALERTS.map(a => `
+    <div class="alert-item ${a.unread ? 'unread' : ''}">
+      <div class="alert-icon">${ALERT_ICONS[a.icon]}</div>
+      <div class="alert-body">
+        <div class="at-title">${a.title}</div>
+        <div class="at-sub">${a.sub}</div>
+        <div class="at-time">${a.time}</div>
+      </div>
+    </div>
+  `).join("");
+  document.getElementById("alertsDot").style.display = ALERTS.some(a => a.unread) ? "block" : "none";
+}
+function markAllAlertsRead(){
+  ALERTS.forEach(a => a.unread = false);
+  renderAlerts();
+}
+const alertsBtn = document.getElementById("alertsBtn");
+const alertsPanel = document.getElementById("alertsPanel");
+const alertsBackdrop = document.getElementById("alertsBackdrop");
+alertsBtn.addEventListener("click", () => {
+  const r = alertsBtn.getBoundingClientRect();
+  alertsPanel.style.top = (r.bottom + 8) + "px";
+  alertsPanel.style.right = (window.innerWidth - r.right) + "px";
+  alertsPanel.classList.add("open");
+  alertsBackdrop.classList.add("open");
+});
+function closeAlerts(){
+  alertsPanel.classList.remove("open");
+  alertsBackdrop.classList.remove("open");
+}
+alertsBackdrop.addEventListener("click", closeAlerts);
+
+/* ======================================================================
    INIT
    ====================================================================== */
-go("dashboard");
+renderAlerts();
+renderLoginClientList();
 </script>
 </body>
 </html>
