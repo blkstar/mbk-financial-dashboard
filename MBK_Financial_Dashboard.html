@@ -605,14 +605,14 @@ table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
     </div>
     <div class="login-card-body">
       <div class="login-mode-toggle">
-        <button class="login-mode-btn active" id="modeAdvisorBtn" onclick="setLoginMode('advisor')">Advisor</button>
-        <button class="login-mode-btn" id="modeClientBtn" onclick="setLoginMode('client')">Client</button>
+        <button class="login-mode-btn active" id="modeAdvisorBtn" type="button" onclick="setLoginMode('advisor')">Advisor</button>
+        <button class="login-mode-btn" id="modeClientBtn" type="button" onclick="setLoginMode('client')">Client</button>
       </div>
 
       <div class="login-panel active" id="panelAdvisor">
         <div class="login-field"><label>Email</label><input type="email" value="admin@mbkfinancial.com"></div>
         <div class="login-field"><label>Password</label><input type="password" value="••••••••"></div>
-        <button class="btn btn-primary login-submit" onclick="loginAsAdmin()">
+        <button class="btn btn-primary login-submit" id="loginAdvisorBtn" type="button" onclick="loginAsAdmin()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Sign in as advisor
         </button>
@@ -2225,7 +2225,7 @@ const CLIENT_ONLY_HIDDEN_VIEWS = ["recommendations", "notes", "intake", "benchma
 function renderLoginClientList(){
   const wrap = document.getElementById("loginClientList");
   wrap.innerHTML = clients.map(c => `
-    <button class="login-client-tile" onclick="loginAsClient('${c.id}')">
+    <button class="login-client-tile" type="button" data-client-id="${c.id}" onclick="loginAsClient('${c.id}')">
       <div class="ca">${initials(c.name)}</div>
       <div>
         <div class="cn">${c.name}</div>
@@ -2233,6 +2233,11 @@ function renderLoginClientList(){
       </div>
     </button>
   `).join("");
+  // Belt-and-suspenders: wire click via addEventListener too, in case a
+  // browser extension or security policy strips inline onclick attributes.
+  wrap.querySelectorAll(".login-client-tile").forEach(btn=>{
+    btn.addEventListener("click", ()=> loginAsClient(btn.dataset.clientId));
+  });
 }
 
 function setLoginMode(mode){
@@ -2344,6 +2349,13 @@ alertsBackdrop.addEventListener("click", closeAlerts);
    ====================================================================== */
 renderAlerts();
 renderLoginClientList();
+
+// Belt-and-suspenders: wire the login controls via addEventListener too,
+// in case a browser extension or security policy strips inline onclick
+// attributes (this was reported as a real-world "sign in does nothing" bug).
+document.getElementById("modeAdvisorBtn").addEventListener("click", ()=> setLoginMode("advisor"));
+document.getElementById("modeClientBtn").addEventListener("click", ()=> setLoginMode("client"));
+document.getElementById("loginAdvisorBtn").addEventListener("click", (e)=>{ e.preventDefault(); loginAsAdmin(); });
 </script>
 </body>
 </html>
