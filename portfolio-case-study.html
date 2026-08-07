@@ -373,10 +373,55 @@ ul.principles li .num{
   </section>
 
   <section>
+    <div class="section-title">Round Two</div>
+    <h2 class="section-head">The dashboard had an audience nobody had designed for yet</h2>
+    <p class="body-text">After MBK walked her client through the first build, one requirement fell out that the original brief never mentioned: the client's customers wanted to log into the same dashboard themselves, between advisory calls, instead of waiting on a printed report. Every screen up to that point had been designed for one audience — MBK, reviewing the numbers before a meeting. This asked for a second one, with a much narrower need.</p>
+    <p class="body-text">Since the dashboard has no backend by design — that's the entire reason it costs MBK nothing to run — real authentication was off the table. I built a role-based mock login instead: an Advisor / Client toggle where the selected role controls what's visible, not what's stored anywhere. It's a deliberate trade, clearly labeled as a demo build, in exchange for staying inside the zero-subscription constraint the project started with.</p>
+    <p class="body-text">Advisors keep the full working view. Clients get the four screens that answer their own question — Dashboard, Performance, Goals &amp; Benchmarks, Cash &amp; Debt — plus printing. Recommendations, Advisor Notes, Client Intake, and Industry Benchmarks stay advisor-only: internal analysis, not something to hand a client raw.</p>
+
+    <div class="screen-row">
+      <div class="mock"><img src="assets/login-advisor.jpg" alt="Advisor login screen with email, password, and sign-in button"></div>
+      <div class="screen-copy">
+        <div class="s-label">Login — Advisor</div>
+        <div class="s-title">One screen, two ways in</div>
+        <div class="s-body">The Advisor tab keeps MBK's own sign-in familiar — email, password, a single button — even though nothing here is checked against a real account.</div>
+      </div>
+    </div>
+
+    <div class="screen-row rev">
+      <div class="mock"><img src="assets/login-client.jpg" alt="Client login screen showing a list of business tiles to select from"></div>
+      <div class="screen-copy">
+        <div class="s-label">Login — Client</div>
+        <div class="s-title">Pick a business, not a username</div>
+        <div class="s-body">The Client tab lists businesses by name and industry instead of asking for a username, matching how MBK already talks about her roster. Selecting a tile logs that client straight into their own dashboard.</div>
+        <div class="design-note">Design note: this is where the login pattern departs from a typical client portal. With no backend, there's no real per-client password to check — so the tile list does the identification work a login form normally would, while staying honest that this is a demo build.</div>
+      </div>
+    </div>
+
+    <p class="body-text">A second gap came out of the same conversation: once a client can log in on her own schedule, she needs a reason to come back and a way to know something changed since her last visit. I added a header alerts bell with a dropdown — a new report available, a workbook just imported, a recommendation flagged — so opening the dashboard between calls surfaces something worth checking, instead of a static page that looks the same every time.</p>
+
+    <div class="screen-row">
+      <div class="mock"><img src="assets/alerts-dropdown.jpg" alt="Alerts dropdown open in the dashboard header showing three notifications"></div>
+      <div class="screen-copy">
+        <div class="s-label">Alerts</div>
+        <div class="s-title">A reason to open it more than once a month</div>
+        <div class="s-body">An unread-count dot on the bell, three notification types, and a "mark all read" action — enough to signal freshness without turning the dashboard into an inbox.</div>
+      </div>
+    </div>
+
+    <p class="body-text" style="margin-top:8px;">Before building any of it, I mapped the advisor and client journeys side by side in FigJam — partly to catch gaps before writing code (what does logout actually reset? what happens if a client's tile list is empty?), and partly because two roles sharing one dashboard is a harder thing to sanity-check from code than from a flow. Walking both paths end to end is also what surfaced the client-tile pattern above, in place of a first draft that had clients typing a username the way an advisor would.</p>
+    <div class="mock" style="margin-top:20px;">
+      <img src="assets/figjam-journey.jpg" alt="FigJam flow diagrams of the admin journey and client journey through the dashboard, side by side">
+    </div>
+    <p class="footnote">Admin journey (left) and client journey (right), mapped in FigJam before implementation — later reused as documentation for MBK's own reference.</p>
+  </section>
+
+  <section>
     <div class="section-title">Outcome</div>
     <div class="outcome-box">
       <div class="o-label">Where it stands</div>
       <p class="o-body">The dashboard is live on GitHub Pages, currently running a real client's data alongside two demo clients used to validate the multi-industry benchmark model. It's documented with a PRD and README in the project repo, and every view has been exported to Figma for MBK's own reference and future handoff.</p>
+      <p class="o-body">Role-based login now separates MBK's internal working view from what a client sees, with an alerts system designed to bring clients back to the dashboard between advisory calls rather than waiting for the next printed report.</p>
       <p class="o-body">Next up: a persistent client store — client records currently live in-session and are rebuilt from the workbook on each upload — and expanding the industry benchmark set beyond the initial eight profiles as MBK brings on clients outside those categories.</p>
     </div>
   </section>
