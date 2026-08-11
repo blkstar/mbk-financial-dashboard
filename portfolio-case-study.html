@@ -423,7 +423,7 @@ ul.principles li .num{
       <div class="o-label">Where it stands</div>
       <p class="o-body">The dashboard is live on GitHub Pages, currently running a real client's data alongside two demo clients used to validate the multi-industry benchmark model. It's documented with a PRD and README in the project repo, and every view has been exported to Figma for MBK's own reference and future handoff.</p>
       <p class="o-body">Role-based login now separates MBK's internal working view from what a client sees, with an alerts system designed to bring clients back to the dashboard between advisory calls rather than waiting for the next printed report.</p>
-      <p class="o-body">Next up: a persistent client store — client records currently live in-session and are rebuilt from the workbook on each upload — and expanding the industry benchmark set beyond the initial eight profiles as MBK brings on clients outside those categories.</p>
+      <p class="o-body">Next up: persistent storage. Client records currently live in-session and reset on reload — there's no way for a client's own device to see data MBK uploaded from hers. The plan is a lightweight backend like Supabase, paired with real authentication and row-level security rather than persistence alone, since a real database holding client financials needs more than a UI-level access rule to protect it.</p>      <p class="o-body">Also on the list: expanding the industry benchmark set beyond the initial eight profiles as MBK brings on clients outside those categories.</p>
     </div>
   </section>
 
